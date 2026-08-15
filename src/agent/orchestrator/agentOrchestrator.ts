@@ -8,8 +8,8 @@ import {
   VerifyPhotosTool,
 } from '../tools/discoveryTools';
 import { PlaceVerifier } from '../verification/placeVerifier';
+import { IntentRanker } from '../ranking/intentRanker';
 import {
-  SearchIntent,
   PlaceCandidate,
   DiscoveryResult,
   AgentExecutionTrace,
@@ -26,8 +26,7 @@ export class DiscoveryAgentOrchestrator {
   private reviewTool: SynthesizeReviewsTool;
   private photoTool: VerifyPhotosTool;
   private placeVerifier: PlaceVerifier;
-
-  private maxExecutionSteps = 8;
+  private intentRanker: IntentRanker;
 
   constructor(
     placeProvider: PlaceSearchProvider,
@@ -41,10 +40,11 @@ export class DiscoveryAgentOrchestrator {
     this.reviewTool = new SynthesizeReviewsTool(placeProvider, llmProvider);
     this.photoTool = new VerifyPhotosTool(placeProvider);
     this.placeVerifier = new PlaceVerifier();
+    this.intentRanker = new IntentRanker();
   }
 
   /**
-   * Runs the iterative multi-step agent discovery loop with rigorous verification & reputation analysis
+   * Runs the iterative multi-step agent discovery loop with rigorous verification & dynamic intent ranking
    */
   async runDiscovery(
     rawQuery: string,
@@ -144,10 +144,6 @@ export class DiscoveryAgentOrchestrator {
       const distanceKm = haversineDistanceKm(originCoords, raw.coordinates);
       const travelMins = estimateDriveTimeMinutes(distanceKm);
 
-      // Intent match scoring calculation
-      let score = 96 - verifiedCandidates.length * 4 - Math.round(distanceKm * 0.15);
-      score = Math.max(70, Math.min(98, score));
-
       verifiedCandidates.push({
         id: raw.id,
         name: raw.name,
@@ -172,15 +168,14 @@ export class DiscoveryAgentOrchestrator {
         sources: verificationOutcome.sources,
         verifications: verificationOutcome.verifications,
         intentMatch: {
-          score,
-          explanation: `Top fit for your natural-language request: combines quiet countryside evening atmosphere with verified water activity and overnight cabins.`,
-          potentialDownside: reviews.result.negativeThemes[0] || (distanceKm > 30 ? 'Located >30 km outside city; allow 40+ min driving time.' : undefined),
+          score: 85,
+          explanation: 'Pending rank evaluation',
           factorScores: {
-            activityMatch: 0.95,
-            atmosphereMatch: 0.92,
-            accommodationMatch: 0.95,
-            distanceMatch: Math.max(0.6, 1 - distanceKm / 100),
-            reputationScore: Math.min(1.0, (reviews.result.rating / 5.0)),
+            activityMatch: 0.9,
+            atmosphereMatch: 0.9,
+            accommodationMatch: 0.9,
+            distanceMatch: 0.8,
+            reputationScore: 0.9,
           },
         },
         tags: ['Water Sports', 'Overnight Stay', 'Quiet', 'Nature', 'Outside City'],
@@ -195,16 +190,16 @@ export class DiscoveryAgentOrchestrator {
       );
     }
 
-    // STEP 7: Re-rank based on intent priority weights or contextual refinements
-    let sortedCandidates = [...verifiedCandidates];
+    // STEP 7: Dynamic Intent Ranking & Explanations
+    let rankedCandidates = this.intentRanker.rankCandidates(verifiedCandidates, intent);
+
+    // Apply contextual refinements if requested
     if (refinementKey === 'closer') {
-      sortedCandidates.sort((a, b) => a.distanceKm - b.distanceKm);
+      rankedCandidates.sort((a, b) => a.distanceKm - b.distanceKm);
     } else if (refinementKey === 'quieter') {
-      sortedCandidates.sort((a, b) => b.reviewSummary.rating - a.reviewSummary.rating);
+      rankedCandidates.sort((a, b) => b.reviewSummary.rating - a.reviewSummary.rating);
     } else if (refinementKey === 'more_activities') {
-      sortedCandidates.sort((a, b) => b.activities.length - a.activities.length);
-    } else {
-      sortedCandidates.sort((a, b) => b.intentMatch.score - a.intentMatch.score);
+      rankedCandidates.sort((a, b) => b.activities.length - a.activities.length);
     }
 
     const executionTimeMs = Date.now() - startTime;
@@ -215,7 +210,7 @@ export class DiscoveryAgentOrchestrator {
       searchHypotheses: hypotheses,
       candidateCount: rawCandidates.length + 8,
       deduplicatedCount: deduplicatedRaw.length,
-      verifiedCount: sortedCandidates.length,
+      verifiedCount: rankedCandidates.length,
       rejectedCount: rejections.length,
       rejections,
       toolInvocations: toolTraces,
@@ -223,10 +218,10 @@ export class DiscoveryAgentOrchestrator {
     };
 
     return {
-      places: sortedCandidates,
+      places: rankedCandidates,
       trace,
       query: rawQuery,
-      totalFound: sortedCandidates.length,
+      totalFound: rankedCandidates.length,
       timestamp: new Date().toISOString(),
     };
   }
