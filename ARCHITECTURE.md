@@ -1,87 +1,67 @@
-# System Architecture - AI Local Discovery Agent
+# System Architecture & Technical Specifications
 
-## 1. High-Level Architecture Overview
+## 1. Architectural Overview
 
-The AI Local Discovery Agent is structured as a decoupled, layered system where user intent in natural language flows through semantic expansion, agentic search and verification, reputation synthesis, and photo relevance scoring before reaching the frontend.
+AI Local Discovery Agent is constructed as a modern Next.js 14 (App Router) full-stack application with strict layered separation between presentation, orchestration, domain verification, and external provider adapters.
 
-```
-┌───────────────────────────────────────────────────────────────┐
-│                    Client (Next.js React UI)                  │
-│  ┌───────────────┐ ┌───────────────┐ ┌──────────────────────┐ │
-│  │  Hero Search  │ │ Result Cards  │ │ Dynamic Refinements  │ │
-│  └───────┬───────┘ └───────▲───────┘ └──────────┬───────────┘ │
-│          │                 │                    │             │
-│  ┌───────▼─────────────────┴────────────────────▼───────────┐ │
-│  │            Agent Execution Trace & State Stream          │ │
-│  └─────────────────────────┬────────────────────────────────┘ │
-└────────────────────────────┼──────────────────────────────────┘
-                             │ REST / Server Actions / SSE
-┌────────────────────────────▼──────────────────────────────────┐
-│                   Application / API Layer                     │
-│               (/api/agent/discover, /api/places)              │
-└────────────────────────────┬──────────────────────────────────┘
-                             │
-┌────────────────────────────▼──────────────────────────────────┐
-│                     Agent Orchestrator                        │
-│  ┌──────────────────────────────────────────────────────────┐ │
-│  │ 1. Intent Extraction (LLM: temporal, activity, overnight)│ │
-│  │ 2. Semantic Query Expansion (hypotheses generation)      │ │
-│  │ 3. Candidate Search & Deduplication                      │ │
-│  │ 4. Verification Loop (claims vs reality)                 │ │
-│  │ 5. Review & Reputation Synthesis                         │ │
-│  │ 6. Photo Relevance & Confidence Check                    │ │
-│  │ 7. Weighted Intent Match Scoring & Explanation           │ │
-│  │ 8. Contextual Refinement Suggestion Engine               │ │
-│  └──────────────────────────┬───────────────────────────────┘ │
-└─────────────────────────────┼─────────────────────────────────┘
-                              │
-┌─────────────────────────────▼─────────────────────────────────┐
-│                   Provider Abstraction Layer                  │
-│  ┌────────────────────┐ ┌───────────────────┐ ┌─────────────┐ │
-│  │ PlaceSearchProvider│ │    LLMProvider    │ │GeocodingProv│ │
-│  └─────────┬──────────┘ └─────────┬─────────┘ └──────┬──────┘ │
-└────────────┼──────────────────────┼──────────────────┼────────┘
-             ▼                      ▼                  ▼
-┌───────────────────────┐ ┌───────────────────┐ ┌───────────────┐
-│ Google Places / Serper│ │ Gemini / OpenAI / │ │ OpenStreetMap │
-│ / Mock Discovery Engine│ │ High-Fid Mock LLM │ │ / Browser Geo │
-└───────────────────────┘ └───────────────────┘ └───────────────┘
+```text
+[ Presentation Layer: Next.js Client Components (Vanilla CSS Tokens) ]
+                               │
+                               ▼ (POST /api/discover)
+[ Service Layer: DiscoveryService & Session Routing ]
+                               │
+                               ▼
+[ Agent Layer: DiscoveryAgentOrchestrator (State Machine & Tool Registry) ]
+   ├── GeocodeLocationTool
+   ├── IntentExtractionTool (IntentParser)
+   ├── SemanticExpansionTool (SemanticQueryExpander)
+   ├── SearchPlacesTool (AggregatedPlaceProvider)
+   ├── SynthesizeReviewsTool (ReputationAnalyzer)
+   ├── VerifyPhotosTool (PhotoVerifier)
+   ├── PlaceVerifier (6-Dimensional Grounding)
+   ├── IntentRanker (Dynamic Multi-Factor Ranking)
+   └── ConversationMemoryManager (Multi-Turn Context)
+                               │
+                               ▼
+[ Provider Layer: Pluggable External Adapters ]
+   ├── NominatimGeocodingProvider (OpenStreetMap Nominatim)
+   ├── OverpassPlaceProvider (OpenStreetMap Overpass API)
+   ├── SerperPlaceProvider (Google Places API)
+   ├── GeminiLLMProvider / OpenAILLMProvider
+   └── Mock Provider Fallback Layer (Zero-Config Offline Support)
 ```
 
-## 2. Key Modules & Subsystems
+---
 
-### 2.1 Intent Parser (`src/agent/intent/`)
-Transforms freeform text into a typed `SearchIntent` object:
-- Temporal constraints (day of week, time of day).
-- Desired experiences and activities.
-- Atmosphere (quiet, vibrant, secluded, romantic).
-- Accommodation / overnight requirements (required, optional, forbidden).
-- Proximity & budget boundaries.
+## 2. Core Subsystems
 
-### 2.2 Semantic Query Expander (`src/agent/expansion/`)
-Generates 5-10 distinct search hypotheses spanning direct synonyms, adjacent categories, and activity venues (e.g. from "water riding and countryside sleep" -> `wake park`, `wakeboarding`, `lake resort`, `water glamping`, `countryside recreation base`).
+### 2.1 LLM Intent Engine (`src/agent/intent/intentParser.ts`)
+- Accepts raw natural language input and resolves temporal attributes (`day`, `period`, `isWeekend`), activity desires, atmospheric requirements, accommodation prerequisites, dynamic importance weights, and unknown parameters.
+- Features dual-mode extraction: LLM structured JSON output with automatic deterministic fallback.
 
-### 2.3 Multi-Step Agent Loop (`src/agent/orchestrator/`)
-Executes an iterative tool-use loop with step limits to prevent infinite cycles:
-1. Search candidate places across generated hypotheses.
-2. Deduplicate candidate entities by name, geo-distance, and category.
-3. Verify candidate capability against specific user constraints (overnight availability, water sport infrastructure).
-4. Aggregate reviews to extract authentic visitor sentiment, positive highlights, and potential caveats.
-5. Score and filter place photos for verified relevance.
-6. Calculate Intent Match Score and generate a personalized "Why it matches" explanation.
+### 2.2 Semantic Query Expander (`src/agent/expansion/queryExpander.ts`)
+- Bridges natural language desires (e.g. *"где можно покататься на воде и поспать за городом"*) into concrete venue categories and search terms (*wake park, cable wakeboarding, lake resort, glamping safari dome, waterfront cabins*).
 
-### 2.4 Provider Abstractions (`src/providers/`)
-Clean interfaces decoupling external APIs from core application logic:
-- `PlaceSearchProvider`: `searchPlaces`, `getPlaceDetails`, `getReviews`, `getPhotos`
-- `LLMProvider`: `generateText`, `generateStructured<T>`
-- `GeocodingProvider`: `reverseGeocode`, `forwardGeocode`
+### 2.3 Place Verifier (`src/agent/verification/placeVerifier.ts`)
+- Rigorously validates candidate places across 6 distinct dimensions:
+  1. **Identity**: Valid name, coordinates, and listing existence.
+  2. **Location & Distance**: Real Haversine geo calculation from user origin.
+  3. **Activity Capability**: Confirms equipment and active operations.
+  4. **Accommodation & Overnight**: Confirms heated cabins / lodging.
+  5. **Schedule**: Confirms operational status on requested day/time.
+  6. **Atmosphere**: Validates noise level and nature setting.
 
-### 2.5 Presentation Layer (`src/components/`)
-- Responsive consumer UI with mobile-first touch optimization.
-- Live progress indicator reflecting real agent lifecycle stages.
-- Rich Result Cards and Deep Place Detail views.
-- Dynamic refinement pill bar updating agent search parameters.
+### 2.4 Grounded Reputation Analyzer (`src/agent/reputation/reputationAnalyzer.ts`)
+- Synthesizes authentic visitor reviews to extract positive highlights, caveats/downsides, and review volume confidence without fabricating quotes.
 
-## 3. Data Integrity & Verification Standards
-- Zero hallucination policy: Missing or unverified claims explicitly flagged as `unverified` or `limited evidence`.
-- Strict photo relevance pipeline: Discards generic stock or location-mismatched imagery.
+### 2.5 Strict Photo Verifier (`src/agent/photos/photoVerifier.ts`)
+- Enforces a strict minimum confidence threshold of `0.75`.
+- Automatically rejects generic stock photography or mismatched imagery.
+
+### 2.6 Dynamic Intent Ranker (`src/agent/ranking/intentRanker.ts`)
+- Computes multi-factor weighted match score:
+  $$\text{Score} = (S_{\text{act}} \cdot W_{\text{act}} + S_{\text{atm}} \cdot W_{\text{atm}} + S_{\text{acc}} \cdot W_{\text{acc}} + S_{\text{dist}} \cdot W_{\text{dist}} + S_{\text{rep}} \cdot W_{\text{rep}}) \times 100$$
+- Generates transparent "Why AI picked this" explanations.
+
+### 2.7 Conversational Memory Manager (`src/agent/memory/conversationMemory.ts`)
+- Maintains multi-turn context across consecutive search turns, allowing users to ask follow-up questions (*"А есть среди них с сауной?"*) while retaining location, schedule, and overnight constraints.

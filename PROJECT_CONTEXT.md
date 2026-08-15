@@ -1,86 +1,101 @@
-# PROJECT CONTEXT
+# Project Context & Developer Reference
 
-## Product Vision
+## 1. Quick Repository Map
 
-An AI-native local discovery agent where users describe their desired experience in natural human language without knowing place names, categories, or keywords. The AI extracts structured intent, semantically expands search hypotheses, searches for real places, rigorously verifies claims, analyzes authentic reviews and place-specific photos, ranks candidates by true intent match, and presents recommendations through an intuitive, aesthetic consumer web app.
+```text
+c:\Users\dmitr\Desktop\AI_Agent\
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx                # App root layout, fonts, metadata
+│   │   ├── page.tsx                  # Primary page orchestrating state, memory & modals
+│   │   ├── page.module.css           # Grid, layout, hero, and container styles
+│   │   ├── globals.css               # Design tokens, color palette, animations
+│   │   └── api/
+│   │       └── discover/
+│   │           └── route.ts          # POST endpoint accepting query, location, sessionId
+│   ├── components/
+│   │   ├── Header.tsx                # App header, location selector, trace launcher
+│   │   ├── HeroSearch.tsx            # Experiential natural language search input
+│   │   ├── AgentProgress.tsx         # Live multi-step execution visualization
+│   │   ├── PlaceCard.tsx             # Place candidate card with match score & photo
+│   │   ├── PlaceDetailsModal.tsx     # Comprehensive place modal with verification claims
+│   │   ├── RefinementBar.tsx         # Dynamic AI refinement chips & follow-up input
+│   │   ├── LocationModal.tsx         # Geolocation detector and city picker
+│   │   └── AgentTraceModal.tsx       # Detailed execution trace viewer
+│   ├── domain/
+│   │   └── types.ts                  # Typed domain models
+│   ├── providers/
+│   │   ├── types.ts                  # Provider interfaces
+│   │   ├── factory.ts                # ProviderFactory singleton
+│   │   ├── real/
+│   │   │   ├── AggregatedPlaceProvider.ts
+│   │   │   ├── NominatimGeocodingProvider.ts
+│   │   │   ├── OverpassPlaceProvider.ts
+│   │   │   ├── SerperPlaceProvider.ts
+│   │   │   ├── GeminiLLMProvider.ts
+│   │   │   └── OpenAILLMProvider.ts
+│   │   └── mock/
+│   │       ├── MockPlaceProvider.ts
+│   │       ├── MockGeocodingProvider.ts
+│   │       └── MockLLMProvider.ts
+│   ├── agent/
+│   │   ├── intent/
+│   │   │   ├── intentParser.ts
+│   │   │   └── intentParser.test.ts
+│   │   ├── expansion/
+│   │   │   ├── queryExpander.ts
+│   │   │   └── queryExpander.test.ts
+│   │   ├── tools/
+│   │   │   ├── agentTool.ts
+│   │   │   └── discoveryTools.ts
+│   │   ├── orchestrator/
+│   │   │   ├── agentOrchestrator.ts
+│   │   │   └── agentOrchestrator.test.ts
+│   │   ├── verification/
+│   │   │   ├── placeVerifier.ts
+│   │   │   └── placeVerifier.test.ts
+│   │   ├── reputation/
+│   │   │   ├── reputationAnalyzer.ts
+│   │   │   └── reputationAnalyzer.test.ts
+│   │   ├── photos/
+│   │   │   ├── photoVerifier.ts
+│   │   │   └── photoVerifier.test.ts
+│   │   ├── ranking/
+│   │   │   ├── intentRanker.ts
+│   │   │   └── intentRanker.test.ts
+│   │   ├── refinement/
+│   │   │   ├── refinementEngine.ts
+│   │   │   └── refinementEngine.test.ts
+│   │   └── memory/
+│   │       ├── conversationMemory.ts
+│   │       └── conversationMemory.test.ts
+│   ├── utils/
+│   │   └── geo.ts                    # Haversine distance, driving time, deduplication
+│   ├── services/
+│   │   └── discoveryService.ts       # Application service facade
+│   └── qa/
+│       └── e2eTestSuite.ts           # 15-scenario end-to-end test battery
+├── MASTER_PROMPT.md
+├── PROJECT_STATUS.md
+├── ARCHITECTURE.md
+├── DECISIONS.md
+├── README.md
+├── .env.example
+├── package.json
+└── tsconfig.json
+```
 
-## Product Principles
+## 2. Key Commands Reference
 
-1. **Experience Over Category**: Users describe what they want to feel, do, and experience; the agent bridges human desires to business real-world offerings.
-2. **Authenticity & Data Integrity**: Never fabricate places, ratings, review quotes, opening hours, or photos. If data is unknown or unverifiable, explicitly state it.
-3. **Photo Trust Rule**: Prefer "No verified photo" over showing a photo of a wrong/generic place or stock image. Photo relevance is a data-trust problem.
-4. **Active Multi-Step Reasoning**: Discovery is an iterative agent loop (intent -> hypothesis expansion -> search -> evaluate -> verify -> rank), not a single-shot prompt.
-5. **Dynamic Refinement**: User refinements (e.g., "Ближе", "Тише", "Подешевле") update the underlying agent search strategy and re-verify candidates, rather than simply filtering a static client-side list.
+```bash
+# Run local dev server
+npm run dev
 
-## UX Decisions
+# Run full 15-scenario test battery
+npx tsx src/qa/e2eTestSuite.ts
 
-- **Hero Natural Language Input**: Prominent, welcoming, intuitive input box with rich placeholder and example suggestions.
-- **Transparent Execution Trace**: High-level visual step progression ("Understanding request", "Expanding search ideas", "Verifying accommodation") without leaking raw chain-of-thought tokens.
-- **Consumer Luxury Aesthetic**: Slate/neutral dark-and-light luxury palette, crisp typography, large media cards, contextual badge tags, no dashboard clichés.
-- **First-Class Geolocation**: Auto-detect with graceful manual fallback; clear indicator (e.g. 📍 Chișinău).
-
-## Architecture Decisions
-
-- **Modular Layer Separation**:
-  - UI (Components, State, Responsive views)
-  - Application Layer (Use cases, session orchestration)
-  - Agent Layer (Intent parser, Query expansion, Orchestrator loop, Verification engine, Ranker)
-  - Tool Layer (Search tool, Details tool, Reviews tool, Photo tool)
-  - Provider Abstraction Layer (`PlaceSearchProvider`, `LLMProvider`, `GeocodingProvider`)
-  - External Implementations (Google Places/Serper/Overpass/Gemini/OpenAI/Mock)
-- **High-Fidelity Mock Mode**: Ensures the app is 100% testable, demoable, and resilient even when external API credits or credentials are restricted.
-
-## Provider Decisions
-
-- Pluggable `LLMProvider` interface (Gemini / OpenAI / Groq / Mock).
-- Pluggable `PlaceSearchProvider` interface (Google Places API / Serper Places / Geoapify / High-Fidelity Mock).
-- Separation of raw provider responses from normalized internal `PlaceCandidate` domain models.
-
-## Important Constraints
-
-- No native mobile app code in initial web repo — responsive web-first ready for PWA.
-- Never commit secrets or API keys.
-- Strictly sequential milestone execution (M0 through M17).
-
-## Things We Explicitly Do NOT Do
-
-- No fake animations simulating agent actions; states reflect real async tasks.
-- No generic wakeboarding stock photos shown for a specific local wake park.
-- No client-side decorative rating fabrication.
-- No corporate dashboard aesthetic (no purple on dark, no glowing borders, no icon-stuffed bento boxes).
-
-## Known Tradeoffs
-
-- Multi-step verification takes slightly more processing time than single-shot search; mitigated with progressive UI feedback and parallelized tool evaluation.
-
-## Important Bugs / Edge Cases
-
-- Geolocation permission denied by browser -> graceful fallback to default city selector with manual override.
-- Places with zero verified photos -> render elegant placeholder card with category icon instead of random photo.
-- Ambiguous query -> expand broader semantic hypotheses while requesting optional contextual refinement.
-
-## Photo Search Rules
-
-1. Place listing official photos (priority 1).
-2. User-submitted photos with direct place metadata match (priority 2).
-3. Verified context matching (priority 3).
-4. Reject stock photos or photos from different geographic entities.
-
-## Agent Behavior Rules
-
-- Guard against infinite loops with step limits (max 5 tool iterations per user turn).
-- Deduplicate candidates across queries by normalized name and coordinate proximity.
-- Respect explicit user constraints as hard bounds and implicit preferences as ranking multipliers.
-
-## Naming Conventions
-
-- TypeScript types: PascalCase (`PlaceCandidate`, `SearchIntent`, `VerificationClaim`)
-- Components: PascalCase (`HeroSearch`, `PlaceCard`, `RefinementChips`, `AgentTrace`)
-- Modules / utils: kebab-case (`place-provider.ts`, `intent-parser.ts`, `photo-verifier.ts`)
-- CSS Modules: `[name].module.css`
-
-## Future Ideas
-
-- PWA manifest and offline caching of saved places.
-- Multi-day trip itinerary planning mode.
-- Direct booking / reservation deep links.
+# Production build, typecheck, and lint
+npm run build
+npm run typecheck
+npm run lint
+```
