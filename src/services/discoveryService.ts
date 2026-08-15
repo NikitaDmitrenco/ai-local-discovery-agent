@@ -1,5 +1,6 @@
 import { ProviderFactory } from '../providers/factory';
 import { IntentParser } from '../agent/intent/intentParser';
+import { SemanticQueryExpander } from '../agent/expansion/queryExpander';
 import {
   SearchIntent,
   PlaceCandidate,
@@ -34,16 +35,10 @@ export class DiscoveryService {
     const intentParser = new IntentParser(llmProvider);
     const intent = await intentParser.parseIntent(rawQuery, locationName, originCoordinates);
 
-    // 3. Generate semantic search hypotheses based on parsed intent
-    const hypotheses = [
-      'wake park near Chisinau',
-      'cable wakeboarding Moldova',
-      'water sports lake resort overnight',
-      'countryside recreation base with water',
-      'lake glamping and kayak',
-      'peaceful water lodge cabins',
-      'sunset wakeboard reservoir',
-    ];
+    // 3. Generate dynamic semantic search hypotheses based on parsed intent
+    const queryExpander = new SemanticQueryExpander(llmProvider);
+    const expansion = await queryExpander.expandIntent(intent);
+    const hypotheses = expansion.hypotheses;
 
     // 4. Search raw places from PlaceSearchProvider (Real OSM + Serper + Verified Entities)
     const rawPlaces = await placeProvider.searchPlaces(
@@ -189,7 +184,7 @@ export class DiscoveryService {
       toolInvocations: [
         { tool: 'geocode_origin_location', durationMs: 40, status: 'success' },
         { tool: 'intent_parser_engine', durationMs: 180, status: 'success' },
-        { tool: 'expand_semantic_hypotheses', durationMs: 120, status: 'success' },
+        { tool: 'semantic_query_expander', durationMs: 120, status: 'success' },
         { tool: 'search_place_providers', durationMs: 250, status: 'success' },
         { tool: 'verify_place_claims', durationMs: 210, status: 'success' },
         { tool: 'synthesize_reviews', durationMs: 190, status: 'success' },
