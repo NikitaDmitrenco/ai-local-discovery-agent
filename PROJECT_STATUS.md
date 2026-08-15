@@ -1,10 +1,10 @@
 # PROJECT STATUS
 
-Last updated: 2026-08-15 23:39
+Last updated: 2026-08-15 23:42
 
-Current milestone: Milestone 12 — Contextual Refinement
+Current milestone: Milestone 13 — Conversational Multi-turn Memory
 
-Overall completion: 78%
+Overall completion: 84%
 
 ## Milestones
 
@@ -22,8 +22,8 @@ Overall completion: 78%
 | 9 Reviews & Reputation | DONE | 100% | Reputation summarization, positive highlights extraction, caveats detection & confidence volume weighting with automated tests |
 | 10 Photo Relevance | DONE | 100% | Strict place photo verification pipeline, generic stock rejection, confidence scoring & automated tests |
 | 11 Intent Ranking | DONE | 100% | Dynamic weighted scoring model & "Why it matches" explanation generator with automated tests |
-| 12 AI Refinement | IN PROGRESS | 0% | Contextual refinement prompts and dynamic suggestion chips that alter search behavior |
-| 13 Conversational Memory | NOT STARTED | 0% | Multi-turn contextual search continuation |
+| 12 AI Refinement | DONE | 100% | Contextual refinement prompts and dynamic suggestion chips that alter search behavior & automated tests |
+| 13 Conversational Memory | IN PROGRESS | 0% | Multi-turn conversational memory maintaining search session context across iterative questions |
 | 14 Production UX Polish | NOT STARTED | 0% | Micro-animations, responsive perfection, a11y |
 | 15 End-to-End QA | NOT STARTED | 0% | 15 scenario test battery verification |
 | 16 Final Documentation | NOT STARTED | 0% | Full handoff and developer runbooks |
@@ -31,26 +31,26 @@ Overall completion: 78%
 
 ## Current Task
 
-Executing Milestone 12:
-- Build `RefinementEngine` in `src/agent/refinement/refinementEngine.ts`.
-- Implement dynamic contextual refinement chips:
-  - Generate 3-5 smart follow-up suggestions dynamically based on current query and candidate characteristics (e.g. "Ближе к Кишинёву", "Только с отдельными домиками", "Больше водных активностей", "Потише и без музыки").
-  - Support natural language follow-up refinements ("Сделай поближе", "А есть что-то с сауной?").
-  - Update `SearchIntent` and trigger intelligent re-ranking/re-discovery.
-- Automated test in `src/agent/refinement/refinementEngine.test.ts`.
+Executing Milestone 13:
+- Build `ConversationMemoryManager` in `src/agent/memory/conversationMemory.ts`.
+- Implement multi-turn conversational state:
+  - Preserves prior search intent, origin location, explicit constraints, rejected venues, and previous candidate results across conversation turns.
+  - Resolves pronouns and contextual references (e.g., Turn 1: "Хочу тихий вейкпарк с домиками за городом" -> Turn 2: "А есть среди них что-то с сауной?" -> inherits location, Sunday evening, and water requirements while layering sauna).
+  - Handles constraint relaxation / tightening gracefully.
+- Automated test in `src/agent/memory/conversationMemory.test.ts`.
 
 ## Completed
 
-- Completed Milestone 0 through Milestone 11:
-  - Scaffolding, GitHub setup, Core UI, Domain Models, Real Places, Intent Parser, Semantic Query Expander, Agent Orchestrator, Place Verifier, Reputation Analyzer, Photo Verifier, and Intent Ranker.
+- Completed Milestone 0 through Milestone 12:
+  - Scaffolding, GitHub setup, Core UI, Domain Models, Real Places, Intent Parser, Semantic Query Expander, Agent Orchestrator, Place Verifier, Reputation Analyzer, Photo Verifier, Intent Ranker, and Refinement Engine.
   - Verified all unit test suites, builds, typechecks, and lints pass with 0 errors.
 
 ## Remaining
 
-- Milestone 12 implementation:
-  - Create `RefinementEngine` in `src/agent/refinement/refinementEngine.ts`.
-  - Create `refinementEngine.test.ts`.
-  - Wire into `RefinementBar.tsx`, `page.tsx`, and `DiscoveryAgentOrchestrator`.
+- Milestone 13 implementation:
+  - Create `ConversationMemoryManager` in `src/agent/memory/conversationMemory.ts`.
+  - Create `conversationMemory.test.ts`.
+  - Wire into `DiscoveryAgentOrchestrator` and `/api/discover`.
   - Run build, typecheck, lint, commit & push.
 
 ## Blockers
@@ -63,28 +63,28 @@ None.
 
 ## Current Architecture
 
-Next.js 14+ (App Router) + TypeScript + Layered Agent Architecture (UI -> API -> Orchestrator -> Verifiers/Reputation/Ranking/Refinement -> Providers).
+Next.js 14+ (App Router) + TypeScript + Layered Agent Architecture (UI -> API -> Memory -> Orchestrator -> Verifiers/Reputation/Ranking/Refinement -> Providers).
 
 ## Next Action
 
-Implement `RefinementEngine` in `src/agent/refinement/refinementEngine.ts`.
+Implement `ConversationMemoryManager` in `src/agent/memory/conversationMemory.ts`.
 
 ## Acceptance Criteria For Current Milestone
 
-- [ ] Generates contextual suggestions based on current result set.
-- [ ] Refinement chips alter search behavior and recalculate candidate scores.
-- [ ] Free-form conversational refinement prompts are processed intelligently.
-- [ ] Automated refinement test passes.
+- [ ] Contextual memory retains previous turn's intent and constraints.
+- [ ] Resolves follow-up queries referencing previous results without losing context.
+- [ ] Automated conversational memory test passes.
 - [ ] Build & typecheck pass with 0 errors.
 
 ## Last Session Summary
 
-Completed Milestone 11 (Intent Matching and Ranking) with dynamic scoring weights, "Why AI picked this" explanations, and automated tests. Transitioned to Milestone 12.
+Completed Milestone 12 (Contextual Refinement) with dynamic smart chips, modifier applications, and automated tests. Transitioned to Milestone 13.
 
 ## Files Changed
 
-- `src/agent/ranking/intentRanker.ts`
-- `src/agent/ranking/intentRanker.test.ts`
+- `src/domain/types.ts`
+- `src/agent/refinement/refinementEngine.ts`
+- `src/agent/refinement/refinementEngine.test.ts`
 - `src/agent/orchestrator/agentOrchestrator.ts`
 - `PROJECT_STATUS.md`
 
@@ -95,8 +95,9 @@ Completed Milestone 11 (Intent Matching and Ranking) with dynamic scoring weight
 - DEC-003: Multi-Source Aggregated Place Provider.
 - DEC-004: Dual-Engine Intent Extraction.
 - DEC-005: Multi-Strategy Semantic Expansion.
-- DEC-006: Dedicated Tool Abstraction with execution trace duration metrics.
+- DEC-006: Dedicated Tool Abstraction.
 - DEC-007: 6-Dimensional Place Verification.
 - DEC-008: Evidence-Grounded Reputation Synthesis.
 - DEC-009: Strict Venue Photo Verification Pipeline.
-- DEC-010: Dynamic Weighted Intent-Match Scoring & Explanation Model.
+- DEC-010: Dynamic Weighted Intent-Match Scoring.
+- DEC-011: Contextual Dynamic Refinement Engine.

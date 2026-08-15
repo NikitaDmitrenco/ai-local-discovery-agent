@@ -157,3 +157,11 @@ export interface DiscoveryResult {
   totalFound: number;
   timestamp: string;
 }
+
+export interface RefinementOption {
+  id: string;
+  label: string;
+  prompt: string;
+  icon?: string;
+}
+

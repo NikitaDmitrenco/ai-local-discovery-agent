@@ -9,7 +9,9 @@ import {
 } from '../tools/discoveryTools';
 import { PlaceVerifier } from '../verification/placeVerifier';
 import { IntentRanker } from '../ranking/intentRanker';
+import { RefinementEngine } from '../refinement/refinementEngine';
 import {
+  SearchIntent,
   PlaceCandidate,
   DiscoveryResult,
   AgentExecutionTrace,
@@ -27,6 +29,7 @@ export class DiscoveryAgentOrchestrator {
   private photoTool: VerifyPhotosTool;
   private placeVerifier: PlaceVerifier;
   private intentRanker: IntentRanker;
+  private refinementEngine: RefinementEngine;
 
   constructor(
     placeProvider: PlaceSearchProvider,
@@ -41,10 +44,11 @@ export class DiscoveryAgentOrchestrator {
     this.photoTool = new VerifyPhotosTool(placeProvider);
     this.placeVerifier = new PlaceVerifier();
     this.intentRanker = new IntentRanker();
+    this.refinementEngine = new RefinementEngine();
   }
 
   /**
-   * Runs the iterative multi-step agent discovery loop with rigorous verification & dynamic intent ranking
+   * Runs the iterative multi-step agent discovery loop with rigorous verification, reputation analysis, and refinement support
    */
   async runDiscovery(
     rawQuery: string,
@@ -70,7 +74,13 @@ export class DiscoveryAgentOrchestrator {
       coordinates: originCoords,
     });
     toolTraces.push(intentExecution.trace);
-    const intent = intentExecution.result;
+    let intent = intentExecution.result;
+
+    // Apply modifier if refinement key passed
+    if (refinementKey) {
+      const refOutcome = this.refinementEngine.applyRefinement(intent, refinementKey);
+      intent = refOutcome.updatedIntent;
+    }
 
     // STEP 3: Semantic Expansion
     currentStep++;
@@ -193,7 +203,7 @@ export class DiscoveryAgentOrchestrator {
     // STEP 7: Dynamic Intent Ranking & Explanations
     let rankedCandidates = this.intentRanker.rankCandidates(verifiedCandidates, intent);
 
-    // Apply contextual refinements if requested
+    // Apply contextual refinements re-sorting if requested
     if (refinementKey === 'closer') {
       rankedCandidates.sort((a, b) => a.distanceKm - b.distanceKm);
     } else if (refinementKey === 'quieter') {
