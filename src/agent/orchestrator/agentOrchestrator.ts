@@ -38,13 +38,13 @@ export class DiscoveryAgentOrchestrator {
     this.intentTool = new IntentExtractionTool(llmProvider);
     this.expansionTool = new SemanticExpansionTool(llmProvider);
     this.searchTool = new SearchPlacesTool(placeProvider);
-    this.reviewTool = new SynthesizeReviewsTool(placeProvider);
+    this.reviewTool = new SynthesizeReviewsTool(placeProvider, llmProvider);
     this.photoTool = new VerifyPhotosTool(placeProvider);
     this.placeVerifier = new PlaceVerifier();
   }
 
   /**
-   * Runs the iterative multi-step agent discovery loop with rigorous verification
+   * Runs the iterative multi-step agent discovery loop with rigorous verification & reputation analysis
    */
   async runDiscovery(
     rawQuery: string,
@@ -100,7 +100,7 @@ export class DiscoveryAgentOrchestrator {
       }
     }
 
-    // STEP 6: Multi-Factor Verification & Synthesis on Candidates
+    // STEP 6: Multi-Factor Verification & Reputation Synthesis on Candidates
     const verifiedCandidates: PlaceCandidate[] = [];
 
     for (let idx = 0; idx < deduplicatedRaw.length; idx++) {
@@ -125,9 +125,10 @@ export class DiscoveryAgentOrchestrator {
       }
 
       // Execute PlaceVerifier
+      const rawReviews = await (this.searchTool.placeProvider.getReviews(raw.id));
       const verificationOutcome = this.placeVerifier.verifyCandidate(
         raw,
-        await (this.searchTool as any).placeProvider?.getReviews?.(raw.id) || [],
+        rawReviews || [],
         intent
       );
 
@@ -173,13 +174,13 @@ export class DiscoveryAgentOrchestrator {
         intentMatch: {
           score,
           explanation: `Top fit for your natural-language request: combines quiet countryside evening atmosphere with verified water activity and overnight cabins.`,
-          potentialDownside: distanceKm > 30 ? 'Located >30 km outside city; allow 40+ min driving time.' : undefined,
+          potentialDownside: reviews.result.negativeThemes[0] || (distanceKm > 30 ? 'Located >30 km outside city; allow 40+ min driving time.' : undefined),
           factorScores: {
             activityMatch: 0.95,
             atmosphereMatch: 0.92,
             accommodationMatch: 0.95,
             distanceMatch: Math.max(0.6, 1 - distanceKm / 100),
-            reputationScore: 0.94,
+            reputationScore: Math.min(1.0, (reviews.result.rating / 5.0)),
           },
         },
         tags: ['Water Sports', 'Overnight Stay', 'Quiet', 'Nature', 'Outside City'],

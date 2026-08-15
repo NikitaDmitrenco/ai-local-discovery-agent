@@ -2,14 +2,13 @@ import { AgentTool } from './agentTool';
 import { PlaceSearchProvider, LLMProvider, GeocodingProvider, RawPlaceItem, RawReviewItem } from '../../providers/types';
 import { IntentParser } from '../intent/intentParser';
 import { SemanticQueryExpander, ExpansionStrategy } from '../expansion/queryExpander';
+import { ReputationAnalyzer } from '../reputation/reputationAnalyzer';
 import {
   SearchIntent,
   Coordinates,
   ToolInvocationTrace,
   ReviewSummary,
   PhotoEvidence,
-  VerificationClaim,
-  PlaceSource,
 } from '../../domain/types';
 
 /**
@@ -107,7 +106,7 @@ export class SemanticExpansionTool implements AgentTool<{ intent: SearchIntent }
 export class SearchPlacesTool implements AgentTool<{ hypotheses: string[]; coordinates: Coordinates; radiusKm: number }, RawPlaceItem[]> {
   name = 'search_candidate_places';
   description = 'Discovers real place entities across search hypotheses and geographic radius';
-  private placeProvider: PlaceSearchProvider;
+  public placeProvider: PlaceSearchProvider;
 
   constructor(placeProvider: PlaceSearchProvider) {
     this.placeProvider = placeProvider;
@@ -135,51 +134,37 @@ export class SearchPlacesTool implements AgentTool<{ hypotheses: string[]; coord
 }
 
 /**
- * 5. Synthesize Reviews Tool
+ * 5. Synthesize Reviews Tool (Backed by ReputationAnalyzer)
  */
 export class SynthesizeReviewsTool implements AgentTool<{ placeId: string; placeName: string; rating?: number; reviewCount?: number }, ReviewSummary> {
   name = 'synthesize_place_reviews';
   description = 'Extracts authentic visitor sentiment, positive highlights, and potential caveats';
   private placeProvider: PlaceSearchProvider;
+  private analyzer: ReputationAnalyzer;
 
-  constructor(placeProvider: PlaceSearchProvider) {
+  constructor(placeProvider: PlaceSearchProvider, llmProvider: LLMProvider) {
     this.placeProvider = placeProvider;
+    this.analyzer = new ReputationAnalyzer(llmProvider);
   }
 
   async execute(params: { placeId: string; placeName: string; rating?: number; reviewCount?: number }) {
     const start = Date.now();
     const reviews: RawReviewItem[] = await this.placeProvider.getReviews(params.placeId);
+    const summary = await this.analyzer.analyzeReputation(
+      params.placeName,
+      reviews,
+      params.rating,
+      params.reviewCount
+    );
     const durationMs = Date.now() - start;
 
-    const positiveThemes = [
-      'Scenic natural location and clean water',
-      'High-quality equipment and friendly instructors',
-      'Warm and comfortable overnight lodging',
-    ];
-
-    const negativeThemes = ['Advance weekend booking recommended for late arrivals'];
-
-    const summary = reviews.length > 0
-      ? reviews[0].text
-      : 'Praised by visitors for serene water relaxation, clean facilities, and peaceful countryside overnight atmosphere.';
-
-    const reviewSummary: ReviewSummary = {
-      rating: params.rating || 4.7,
-      reviewCount: params.reviewCount || 240,
-      positiveThemes,
-      negativeThemes,
-      summary,
-      confidence: reviews.length > 0 ? 'high' : 'moderate',
-      source: 'Verified Visitor Reviews',
-    };
-
     return {
-      result: reviewSummary,
+      result: summary,
       trace: {
         tool: this.name,
         durationMs,
         status: 'success' as const,
-        summary: `Synthesized reviews for ${params.placeName} (${reviewSummary.rating}⭐, ${reviewSummary.reviewCount} reviews)`,
+        summary: `Synthesized reviews for ${params.placeName} (${summary.rating}⭐, ${summary.reviewCount} reviews, confidence: ${summary.confidence})`,
       },
     };
   }
