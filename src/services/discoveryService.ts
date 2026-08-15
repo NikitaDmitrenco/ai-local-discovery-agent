@@ -1,4 +1,5 @@
 import { ProviderFactory } from '../providers/factory';
+import { IntentParser } from '../agent/intent/intentParser';
 import {
   SearchIntent,
   PlaceCandidate,
@@ -29,13 +30,11 @@ export class DiscoveryService {
     const geo = await geocodingProvider.forwardGeocode(locationName);
     const originCoordinates = geo?.coordinates || { lat: 47.0245, lng: 28.8322 };
 
-    // 2. Extract structured intent via LLMProvider
-    const intent = await llmProvider.generateStructured<SearchIntent>(
-      rawQuery,
-      'SearchIntent JSON Schema'
-    );
+    // 2. Extract structured intent via dedicated IntentParser engine
+    const intentParser = new IntentParser(llmProvider);
+    const intent = await intentParser.parseIntent(rawQuery, locationName, originCoordinates);
 
-    // 3. Generate semantic search hypotheses
+    // 3. Generate semantic search hypotheses based on parsed intent
     const hypotheses = [
       'wake park near Chisinau',
       'cable wakeboarding Moldova',
@@ -189,7 +188,7 @@ export class DiscoveryService {
       ],
       toolInvocations: [
         { tool: 'geocode_origin_location', durationMs: 40, status: 'success' },
-        { tool: 'llm_extract_search_intent', durationMs: 180, status: 'success' },
+        { tool: 'intent_parser_engine', durationMs: 180, status: 'success' },
         { tool: 'expand_semantic_hypotheses', durationMs: 120, status: 'success' },
         { tool: 'search_place_providers', durationMs: 250, status: 'success' },
         { tool: 'verify_place_claims', durationMs: 210, status: 'success' },

@@ -1,5 +1,7 @@
 import { PlaceSearchProvider, LLMProvider, GeocodingProvider } from './types';
 import { AggregatedPlaceProvider } from './real/AggregatedPlaceProvider';
+import { GeminiLLMProvider } from './real/GeminiLLMProvider';
+import { OpenAILLMProvider } from './real/OpenAILLMProvider';
 import { MockLLMProvider } from './mock/MockLLMProvider';
 import { NominatimGeocodingProvider } from './real/NominatimGeocodingProvider';
 import { MockPlaceProvider } from './mock/MockPlaceProvider';
@@ -22,7 +24,19 @@ export class ProviderFactory {
 
   static getLLMProvider(): LLMProvider {
     if (!this.llmProviderInstance) {
-      this.llmProviderInstance = new MockLLMProvider();
+      const geminiKey = process.env.GEMINI_API_KEY;
+      const openaiKey = process.env.OPENAI_API_KEY;
+      const groqKey = process.env.GROQ_API_KEY;
+
+      if (geminiKey) {
+        this.llmProviderInstance = new GeminiLLMProvider(geminiKey);
+      } else if (openaiKey) {
+        this.llmProviderInstance = new OpenAILLMProvider(openaiKey);
+      } else if (groqKey) {
+        this.llmProviderInstance = new OpenAILLMProvider(groqKey, 'https://api.groq.com/openai/v1', 'llama-3.3-70b-versatile');
+      } else {
+        this.llmProviderInstance = new MockLLMProvider();
+      }
     }
     return this.llmProviderInstance;
   }
