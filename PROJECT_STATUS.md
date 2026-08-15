@@ -1,10 +1,10 @@
 # PROJECT STATUS
 
-Last updated: 2026-08-15 23:13
+Last updated: 2026-08-15 23:19
 
-Current milestone: Milestone 4 — Real Place Discovery
+Current milestone: Milestone 5 — LLM Intent Engine
 
-Overall completion: 30%
+Overall completion: 36%
 
 ## Milestones
 
@@ -14,8 +14,8 @@ Overall completion: 30%
 | 1 GitHub | DONE | 100% | GitHub repository created, remote connected, initial commit pushed |
 | 2 Core UI | DONE | 100% | Hero search, multi-step progress, place cards, details modal, refinement chips, trace modal |
 | 3 Domain & Providers | DONE | 100% | Typed domain models, provider abstractions, mock implementations, service layer & API route |
-| 4 Real Place Discovery | IN PROGRESS | 0% | Real place search (Overpass/Nominatim/Geoapify/Google Places/Serper) & radius handling |
-| 5 LLM Intent Engine | NOT STARTED | 0% | Natural language to structured intent |
+| 4 Real Place Discovery | DONE | 100% | Real OSM Overpass provider, Serper Google Places, Nominatim geocoder, Haversine geo distance & deduplication |
+| 5 LLM Intent Engine | IN PROGRESS | 0% | Multi-provider LLM intent parser (Gemini / OpenAI / Groq / Fallback) with strict JSON schema |
 | 6 Semantic Expansion | NOT STARTED | 0% | Semantic search hypotheses & category expansion |
 | 7 Agent Orchestration | NOT STARTED | 0% | Multi-step agent workflow loop & tool execution |
 | 8 Place Verification | NOT STARTED | 0% | Multi-factor claim & evidence verification |
@@ -31,33 +31,37 @@ Overall completion: 30%
 
 ## Current Task
 
-Executing Milestone 4:
-- Implement real place search provider with multi-source fallback (OpenStreetMap/Overpass API + Nominatim Geocoding + Serper/Google Places API when keys present).
-- Support real geo-coordinates, address resolution, real distance and radius calculation (Haversine formula).
-- Deduplicate real entities across queries and multiple search hypotheses.
-- Graceful provider failure handling and transparent fallback to high-fidelity mock engine when offline or unauthenticated.
+Executing Milestone 5:
+- Connect live LLM providers (Google Gemini, OpenAI, Groq) via unified `LLMProvider` interface.
+- Implement structured intent extraction engine extracting:
+  - Explicit requirements vs implied preferences vs optional preferences vs unknowns.
+  - Temporal constraints (day of week, time of day, duration).
+  - Activity concepts (water sports, cable wakeboard, hiking, swimming).
+  - Atmosphere (quiet, secluded, romantic, nature).
+  - Accommodation requirements (overnight stay, cabin/glamping types).
+  - Geographic boundaries & radius.
+- Primary Demo Test Query Validation:
+  - `"Хочу вечерком воскресным отдохнуть в каком-нибудь тихом местечке где можно покататься на воде и поспать за городом"` -> correctly extracts Sunday, evening, water activity, quiet, outside city, overnight stay required.
 
 ## Completed
 
 - Completed Milestone 0 (Project Foundation)
 - Completed Milestone 1 (GitHub Development Workflow)
 - Completed Milestone 2 (Core UI Shell)
-- Completed Milestone 3 (Domain Model and Provider Abstraction):
-  - Defined comprehensive domain types in `src/domain/types.ts`.
-  - Defined clean provider interfaces in `src/providers/types.ts`.
-  - Implemented mock providers in `src/providers/mock/`.
-  - Created `ProviderFactory` in `src/providers/factory.ts`.
-  - Built `DiscoveryService` in `src/services/discoveryService.ts` and `/api/discover` route in `src/app/api/discover/route.ts`.
-  - Refactored all UI components to consume typed domain models.
-  - Verified build, typecheck, and lint pass with 0 errors.
+- Completed Milestone 3 (Domain Model & Provider Abstraction)
+- Completed Milestone 4 (Real Place Discovery):
+  - `src/utils/geo.ts` with Haversine distance, drive time estimation, name normalization and duplicate entity detection.
+  - `NominatimGeocodingProvider` for real forward/reverse geocoding.
+  - `OverpassPlaceProvider` for live OpenStreetMap leisure/sports/chalet discovery.
+  - `SerperPlaceProvider` for Google Places API querying when key present.
+  - `AggregatedPlaceProvider` uniting multi-source discovery with deduplication and resilient fallback.
 
 ## Remaining
 
-- Milestone 4 implementation:
-  - Implement real search providers in `src/providers/real/`.
-  - Implement Overpass/OSM real place provider (free, keyless real geo discovery) and Serper/Google Places provider.
-  - Implement distance calculation utility (`haversineDistanceKm`).
-  - Wire provider factory to auto-select live provider or fallback.
+- Milestone 5 implementation:
+  - Create live Gemini / OpenAI / Groq LLM provider implementations in `src/providers/real/`.
+  - Implement intent prompt templates and JSON schema validators in `src/agent/intent/`.
+  - Wire intent engine into `DiscoveryService`.
   - Run build, typecheck, lint, commit & push.
 
 ## Blockers
@@ -70,42 +74,38 @@ None.
 
 ## Current Architecture
 
-Next.js 14+ (App Router) + TypeScript + Domain Models + Provider Abstraction Layer + API Route Handler.
+Next.js 14+ (App Router) + TypeScript + Domain Models + Provider Abstraction Layer + Real Geocoding & OpenStreetMap Engine + Multi-Provider Aggregation.
 
 ## Next Action
 
-Implement real place discovery provider and distance utilities in `src/providers/real/` and `src/utils/geo.ts`.
+Implement `GeminiLLMProvider` / `OpenAILLMProvider` and intent extractor engine in `src/agent/intent/`.
 
 ## Acceptance Criteria For Current Milestone
 
-- [ ] Real place provider searches real geographic locations & entities.
-- [ ] Real coordinates, addresses, categories, and opening hours handled when available.
-- [ ] Entity deduplication by normalized name and coordinate proximity.
-- [ ] Graceful fallback if external services fail or rate-limit.
+- [ ] LLM provider connects to live Gemini / OpenAI / Groq when keys are available.
+- [ ] Structured intent extraction extracts temporal, activity, ambiance, accommodation, and constraints.
+- [ ] Primary demo query extracts: Sunday, evening, water activity, quiet, outside city, overnight.
+- [ ] Unknowns and optional preferences are separated from hard constraints.
 - [ ] Build & typecheck pass with 0 errors.
 
 ## Last Session Summary
 
-Completed Milestone 3 (Domain Model and Provider Abstraction) with complete typed contracts, ProviderFactory, and API route. Transitioned to Milestone 4.
+Completed Milestone 4 (Real Place Discovery) with real OSM Overpass integration, Nominatim geocoder, and Haversine geo distance calculations. Transitioned to Milestone 5.
 
 ## Files Changed
 
-- `src/domain/types.ts`
-- `src/providers/types.ts`
-- `src/providers/mock/MockPlaceProvider.ts`
-- `src/providers/mock/MockLLMProvider.ts`
-- `src/providers/mock/MockGeocodingProvider.ts`
+- `src/utils/geo.ts`
+- `src/providers/real/NominatimGeocodingProvider.ts`
+- `src/providers/real/OverpassPlaceProvider.ts`
+- `src/providers/real/SerperPlaceProvider.ts`
+- `src/providers/real/AggregatedPlaceProvider.ts`
 - `src/providers/factory.ts`
 - `src/services/discoveryService.ts`
-- `src/app/api/discover/route.ts`
-- `src/components/PlaceCard.tsx`
-- `src/components/PlaceDetailsModal.tsx`
-- `src/components/AgentTraceModal.tsx`
-- `src/app/page.tsx`
+- `tsconfig.json`
 - `PROJECT_STATUS.md`
 
 ## Decisions Made
 
 - DEC-001: Next.js App Router + TypeScript + Vanilla Modern CSS.
 - DEC-002: Pluggable Multi-Provider Domain Layer.
-- DEC-003: Separation of raw provider API responses from internal `PlaceCandidate` models via `DiscoveryService`.
+- DEC-003: Multi-Source Aggregated Place Provider (OSM + Serper + Verified Entities).

@@ -1,6 +1,8 @@
 import { PlaceSearchProvider, LLMProvider, GeocodingProvider } from './types';
-import { MockPlaceProvider } from './mock/MockPlaceProvider';
+import { AggregatedPlaceProvider } from './real/AggregatedPlaceProvider';
 import { MockLLMProvider } from './mock/MockLLMProvider';
+import { NominatimGeocodingProvider } from './real/NominatimGeocodingProvider';
+import { MockPlaceProvider } from './mock/MockPlaceProvider';
 import { MockGeocodingProvider } from './mock/MockGeocodingProvider';
 
 export class ProviderFactory {
@@ -10,15 +12,16 @@ export class ProviderFactory {
 
   static getPlaceProvider(): PlaceSearchProvider {
     if (!this.placeProviderInstance) {
-      // Default to MockPlaceProvider in demo mode or when API keys are not supplied
-      this.placeProviderInstance = new MockPlaceProvider();
+      const isPureMock = process.env.NEXT_PUBLIC_DEMO_MODE === 'pure_mock';
+      this.placeProviderInstance = isPureMock
+        ? new MockPlaceProvider()
+        : new AggregatedPlaceProvider();
     }
     return this.placeProviderInstance;
   }
 
   static getLLMProvider(): LLMProvider {
     if (!this.llmProviderInstance) {
-      // Default to MockLLMProvider in demo mode or when API keys are not supplied
       this.llmProviderInstance = new MockLLMProvider();
     }
     return this.llmProviderInstance;
@@ -26,7 +29,10 @@ export class ProviderFactory {
 
   static getGeocodingProvider(): GeocodingProvider {
     if (!this.geocodingProviderInstance) {
-      this.geocodingProviderInstance = new MockGeocodingProvider();
+      const isPureMock = process.env.NEXT_PUBLIC_DEMO_MODE === 'pure_mock';
+      this.geocodingProviderInstance = isPureMock
+        ? new MockGeocodingProvider()
+        : new NominatimGeocodingProvider();
     }
     return this.geocodingProviderInstance;
   }
