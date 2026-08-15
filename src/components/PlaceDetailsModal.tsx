@@ -15,13 +15,12 @@ import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
-  Share2,
 } from 'lucide-react';
-import { MockPlace } from '../data/mockPlaces';
+import { PlaceCandidate } from '../domain/types';
 import styles from './PlaceDetailsModal.module.css';
 
 interface PlaceDetailsModalProps {
-  place: MockPlace | null;
+  place: PlaceCandidate | null;
   onClose: () => void;
   userQuery?: string;
 }
@@ -61,7 +60,7 @@ export const PlaceDetailsModal: React.FC<PlaceDetailsModalProps> = ({
             <span className={styles.categoryBadge}>{place.category}</span>
             <div className={styles.matchPill}>
               <Sparkles size={13} color="#e6a756" />
-              <span>{place.matchScore}% Intent Match</span>
+              <span>{place.intentMatch.score}% Intent Match</span>
             </div>
           </div>
 
@@ -133,8 +132,8 @@ export const PlaceDetailsModal: React.FC<PlaceDetailsModalProps> = ({
             <div className={styles.ratingLocationRow}>
               <div className={styles.ratingBox}>
                 <Star size={15} fill="#e6a756" color="#e6a756" />
-                <span className={styles.ratingScore}>{place.rating}</span>
-                <span className={styles.reviewTotal}>({place.reviewCount} reviews)</span>
+                <span className={styles.ratingScore}>{place.reviewSummary.rating}</span>
+                <span className={styles.reviewTotal}>({place.reviewSummary.reviewCount} reviews)</span>
               </div>
               <span className={styles.dotSeparator}>•</span>
               <div className={styles.locBox}>
@@ -142,7 +141,7 @@ export const PlaceDetailsModal: React.FC<PlaceDetailsModalProps> = ({
                 <span>{place.address}</span>
               </div>
               <span className={styles.dotSeparator}>•</span>
-              <span className={styles.distHighlight}>{place.distance} ({place.travelTime})</span>
+              <span className={styles.distHighlight}>{place.distanceKm} km ({place.travelTimeMinutes} min drive)</span>
             </div>
           </div>
 
@@ -158,7 +157,7 @@ export const PlaceDetailsModal: React.FC<PlaceDetailsModalProps> = ({
                 <p className={styles.userContextQuery}>&quot;{userQuery}&quot;</p>
               </div>
             )}
-            <p className={styles.aiExplanation}>{place.matchReason}</p>
+            <p className={styles.aiExplanation}>{place.intentMatch.explanation}</p>
           </div>
 
           {/* Overview Description */}
@@ -202,12 +201,12 @@ export const PlaceDetailsModal: React.FC<PlaceDetailsModalProps> = ({
           {/* Reviews & Reputation Analysis */}
           <div className={styles.sectionCard}>
             <h3 className={styles.sectionTitle}>Visitor Reputation & Sentiment</h3>
-            <p className={styles.reputationSummary}>{place.reputation.summary}</p>
+            <p className={styles.reputationSummary}>{place.reviewSummary.summary}</p>
 
             <div className={styles.reputationSplit}>
               <div className={styles.repPros}>
                 <span className={styles.repListTitle}>People Love:</span>
-                {place.reputation.pros.map((pro, idx) => (
+                {place.reviewSummary.positiveThemes.map((pro, idx) => (
                   <div key={idx} className={styles.repListItem}>
                     <CheckCircle2 size={14} color="#34d399" />
                     <span>{pro}</span>
@@ -215,12 +214,12 @@ export const PlaceDetailsModal: React.FC<PlaceDetailsModalProps> = ({
                 ))}
               </div>
 
-              {place.potentialDownside && (
+              {place.intentMatch.potentialDownside && (
                 <div className={styles.repCons}>
                   <span className={styles.repListTitle}>Keep In Mind:</span>
                   <div className={styles.repListItemCaution}>
                     <AlertTriangle size={14} color="#fb7185" />
-                    <span>{place.potentialDownside}</span>
+                    <span>{place.intentMatch.potentialDownside}</span>
                   </div>
                 </div>
               )}

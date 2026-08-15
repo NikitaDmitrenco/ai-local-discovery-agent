@@ -1,31 +1,14 @@
 'use client';
 
 import React from 'react';
-import { X, Activity, CheckCircle2, Search, Filter, ShieldCheck, Star, Layers, ArrowRight } from 'lucide-react';
+import { X, Activity, CheckCircle2, Search, Filter, ShieldCheck, Layers, ArrowRight } from 'lucide-react';
+import { AgentExecutionTrace } from '../domain/types';
 import styles from './AgentTraceModal.module.css';
-
-export interface TraceData {
-  query: string;
-  extractedIntent: {
-    location: string;
-    temporal: { day: string; period: string };
-    activities: string[];
-    atmosphere: string[];
-    accommodation: { required: boolean };
-  };
-  hypotheses: string[];
-  candidateCount: number;
-  deduplicatedCount: number;
-  verifiedCount: number;
-  rejectedCount: number;
-  rejectionReasons: { name: string; reason: string }[];
-  toolInvocations: { tool: string; durationMs: number; status: string }[];
-}
 
 interface AgentTraceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  trace: TraceData | null;
+  trace: AgentExecutionTrace | null;
 }
 
 export const AgentTraceModal: React.FC<AgentTraceModalProps> = ({
@@ -41,7 +24,7 @@ export const AgentTraceModal: React.FC<AgentTraceModalProps> = ({
         <div className={styles.header}>
           <div className={styles.titleGroup}>
             <Activity size={20} color="#38bdf8" />
-            <h3 className={styles.title}>High-Level Agent Execution Trace</h3>
+            <h3 className={styles.title}>High-Level Agent Execution Trace ({trace.executionTimeMs}ms)</h3>
           </div>
           <button className={styles.closeBtn} onClick={onClose} aria-label="Close trace">
             <X size={18} />
@@ -64,10 +47,10 @@ export const AgentTraceModal: React.FC<AgentTraceModalProps> = ({
           <div className={styles.traceBlock}>
             <div className={styles.blockHeading}>
               <Search size={16} color="#e6a756" />
-              <span>2. Semantic Query Expansion ({trace.hypotheses.length} hypotheses generated)</span>
+              <span>2. Semantic Query Expansion ({trace.searchHypotheses.length} hypotheses generated)</span>
             </div>
             <div className={styles.hypothesesList}>
-              {trace.hypotheses.map((hypo, idx) => (
+              {trace.searchHypotheses.map((hypo, idx) => (
                 <div key={idx} className={styles.hypoItem}>
                   <ArrowRight size={13} color="#e6a756" />
                   <span>{hypo}</span>
@@ -106,16 +89,16 @@ export const AgentTraceModal: React.FC<AgentTraceModalProps> = ({
           </div>
 
           {/* 4. Discarded Candidates Rationale */}
-          {trace.rejectionReasons.length > 0 && (
+          {trace.rejections.length > 0 && (
             <div className={styles.traceBlock}>
               <div className={styles.blockHeading}>
                 <ShieldCheck size={16} color="#fb7185" />
                 <span>4. Quality Filter & Rejection Reasons</span>
               </div>
               <div className={styles.rejectionsList}>
-                {trace.rejectionReasons.map((rej, idx) => (
+                {trace.rejections.map((rej, idx) => (
                   <div key={idx} className={styles.rejectionItem}>
-                    <strong>{rej.name}:</strong>
+                    <strong>{rej.placeName}:</strong>
                     <span>{rej.reason}</span>
                   </div>
                 ))}

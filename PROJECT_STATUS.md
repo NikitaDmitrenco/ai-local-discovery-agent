@@ -1,10 +1,10 @@
 # PROJECT STATUS
 
-Last updated: 2026-08-15 22:08
+Last updated: 2026-08-15 23:13
 
-Current milestone: Milestone 3 — Domain Model and Provider Abstraction
+Current milestone: Milestone 4 — Real Place Discovery
 
-Overall completion: 24%
+Overall completion: 30%
 
 ## Milestones
 
@@ -13,8 +13,8 @@ Overall completion: 24%
 | 0 Foundation | DONE | 100% | Next.js, TS, state docs, CSS tokens, build & lint passing |
 | 1 GitHub | DONE | 100% | GitHub repository created, remote connected, initial commit pushed |
 | 2 Core UI | DONE | 100% | Hero search, multi-step progress, place cards, details modal, refinement chips, trace modal |
-| 3 Domain & Providers | IN PROGRESS | 0% | Place/Review/Photo models and provider abstraction layer |
-| 4 Real Place Discovery | NOT STARTED | 0% | Real place provider & geocoding integration |
+| 3 Domain & Providers | DONE | 100% | Typed domain models, provider abstractions, mock implementations, service layer & API route |
+| 4 Real Place Discovery | IN PROGRESS | 0% | Real place search (Overpass/Nominatim/Geoapify/Google Places/Serper) & radius handling |
 | 5 LLM Intent Engine | NOT STARTED | 0% | Natural language to structured intent |
 | 6 Semantic Expansion | NOT STARTED | 0% | Semantic search hypotheses & category expansion |
 | 7 Agent Orchestration | NOT STARTED | 0% | Multi-step agent workflow loop & tool execution |
@@ -31,35 +31,33 @@ Overall completion: 24%
 
 ## Current Task
 
-Executing Milestone 3:
-- Build typed domain models: `PlaceCandidate`, `SearchIntent`, `ReviewSummary`, `PhotoEvidence`, `VerificationClaim`, `AgentExecutionState`.
-- Implement provider abstraction interfaces: `PlaceSearchProvider`, `LLMProvider`, `GeocodingProvider`.
-- Build high-fidelity `MockPlaceSearchProvider` and `MockLLMProvider` that implement the clean domain contracts.
-- Connect the frontend application to consume the typed application/domain layer rather than ad-hoc UI mock data.
+Executing Milestone 4:
+- Implement real place search provider with multi-source fallback (OpenStreetMap/Overpass API + Nominatim Geocoding + Serper/Google Places API when keys present).
+- Support real geo-coordinates, address resolution, real distance and radius calculation (Haversine formula).
+- Deduplicate real entities across queries and multiple search hypotheses.
+- Graceful provider failure handling and transparent fallback to high-fidelity mock engine when offline or unauthenticated.
 
 ## Completed
 
-- Completed Milestone 0 (Project Foundation):
-  - Next.js 14 App Router, TypeScript, vanilla CSS design tokens, state docs.
-- Completed Milestone 1 (GitHub Development Workflow):
-  - Created private repo `NikitaDmitrenco/ai-local-discovery-agent`.
-  - Configured git remote origin, made initial commit, pushed to `main`.
-- Completed Milestone 2 (Core UI Shell):
-  - Hero search with natural language input, demo scenario presets.
-  - Live agent multi-step execution progress indicator.
-  - Rich result cards with intent match score %, photo verification badge, activities, why it matches, reputation pros/cons.
-  - Comprehensive place details modal with photo gallery, activities, overnight stay, reputation split, sources.
-  - Contextual AI refinement chips ("Ближе", "Тише", "Подешевле", "Больше активностей") & conversational refinement input.
-  - Agent execution trace modal for full transparency.
-  - Zero build or lint errors.
+- Completed Milestone 0 (Project Foundation)
+- Completed Milestone 1 (GitHub Development Workflow)
+- Completed Milestone 2 (Core UI Shell)
+- Completed Milestone 3 (Domain Model and Provider Abstraction):
+  - Defined comprehensive domain types in `src/domain/types.ts`.
+  - Defined clean provider interfaces in `src/providers/types.ts`.
+  - Implemented mock providers in `src/providers/mock/`.
+  - Created `ProviderFactory` in `src/providers/factory.ts`.
+  - Built `DiscoveryService` in `src/services/discoveryService.ts` and `/api/discover` route in `src/app/api/discover/route.ts`.
+  - Refactored all UI components to consume typed domain models.
+  - Verified build, typecheck, and lint pass with 0 errors.
 
 ## Remaining
 
-- Milestone 3 implementation:
-  - Create domain types in `src/domain/`.
-  - Create provider interfaces in `src/providers/`.
-  - Implement mock and base provider implementations.
-  - Wire frontend service layer to consume domain layer.
+- Milestone 4 implementation:
+  - Implement real search providers in `src/providers/real/`.
+  - Implement Overpass/OSM real place provider (free, keyless real geo discovery) and Serper/Google Places provider.
+  - Implement distance calculation utility (`haversineDistanceKm`).
+  - Wire provider factory to auto-select live provider or fallback.
   - Run build, typecheck, lint, commit & push.
 
 ## Blockers
@@ -72,47 +70,42 @@ None.
 
 ## Current Architecture
 
-Next.js 14+ (App Router) + TypeScript + Vanilla Modern CSS Modules + Lucide Icons.
+Next.js 14+ (App Router) + TypeScript + Domain Models + Provider Abstraction Layer + API Route Handler.
 
 ## Next Action
 
-Create domain model files in `src/domain/` and provider interfaces in `src/providers/`.
+Implement real place discovery provider and distance utilities in `src/providers/real/` and `src/utils/geo.ts`.
 
 ## Acceptance Criteria For Current Milestone
 
-- [ ] Domain models defined for `PlaceCandidate`, `SearchIntent`, `ReviewSummary`, `PhotoEvidence`, `VerificationClaim`.
-- [ ] Provider interfaces defined (`PlaceSearchProvider`, `LLMProvider`, `GeocodingProvider`).
-- [ ] Provider implementation decouple raw API responses from UI.
+- [ ] Real place provider searches real geographic locations & entities.
+- [ ] Real coordinates, addresses, categories, and opening hours handled when available.
+- [ ] Entity deduplication by normalized name and coordinate proximity.
+- [ ] Graceful fallback if external services fail or rate-limit.
 - [ ] Build & typecheck pass with 0 errors.
 
 ## Last Session Summary
 
-Completed Milestone 2 (Core UI Shell) with rich interactive components, responsive layout, and verified builds.
+Completed Milestone 3 (Domain Model and Provider Abstraction) with complete typed contracts, ProviderFactory, and API route. Transitioned to Milestone 4.
 
 ## Files Changed
 
-- `src/components/Header.tsx`
-- `src/components/Header.module.css`
-- `src/components/LocationModal.tsx`
-- `src/components/LocationModal.module.css`
-- `src/components/HeroSearch.tsx`
-- `src/components/HeroSearch.module.css`
-- `src/components/AgentProgress.tsx`
-- `src/components/AgentProgress.module.css`
+- `src/domain/types.ts`
+- `src/providers/types.ts`
+- `src/providers/mock/MockPlaceProvider.ts`
+- `src/providers/mock/MockLLMProvider.ts`
+- `src/providers/mock/MockGeocodingProvider.ts`
+- `src/providers/factory.ts`
+- `src/services/discoveryService.ts`
+- `src/app/api/discover/route.ts`
 - `src/components/PlaceCard.tsx`
-- `src/components/PlaceCard.module.css`
 - `src/components/PlaceDetailsModal.tsx`
-- `src/components/PlaceDetailsModal.module.css`
-- `src/components/RefinementBar.tsx`
-- `src/components/RefinementBar.module.css`
 - `src/components/AgentTraceModal.tsx`
-- `src/components/AgentTraceModal.module.css`
-- `src/data/mockPlaces.ts`
 - `src/app/page.tsx`
-- `src/app/page.module.css`
 - `PROJECT_STATUS.md`
 
 ## Decisions Made
 
 - DEC-001: Next.js App Router + TypeScript + Vanilla Modern CSS.
 - DEC-002: Pluggable Multi-Provider Domain Layer.
+- DEC-003: Separation of raw provider API responses from internal `PlaceCandidate` models via `DiscoveryService`.

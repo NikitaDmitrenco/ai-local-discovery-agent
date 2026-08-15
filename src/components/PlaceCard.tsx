@@ -1,15 +1,14 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
-import { Star, MapPin, Clock, Bed, CheckCircle, AlertTriangle, ShieldCheck, ArrowUpRight, Compass } from 'lucide-react';
-import { MockPlace } from '../data/mockPlaces';
+import { Star, MapPin, Bed, CheckCircle, AlertTriangle, ShieldCheck, ArrowUpRight, Compass } from 'lucide-react';
+import { PlaceCandidate } from '../domain/types';
 import styles from './PlaceCard.module.css';
 
 interface PlaceCardProps {
-  place: MockPlace;
+  place: PlaceCandidate;
   rankIndex: number;
-  onSelect: (place: MockPlace) => void;
+  onSelect: (place: PlaceCandidate) => void;
 }
 
 export const PlaceCard: React.FC<PlaceCardProps> = ({
@@ -27,7 +26,7 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({
           <span>#{rankIndex + 1} Best Match</span>
         </div>
         <div className={styles.matchScoreBadge}>
-          <span className={styles.matchScoreNumber}>{place.matchScore}%</span>
+          <span className={styles.matchScoreNumber}>{place.intentMatch.score}%</span>
           <span className={styles.matchScoreLabel}>intent match</span>
         </div>
       </div>
@@ -68,15 +67,15 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({
           </div>
           <div className={styles.ratingBadge}>
             <Star size={14} fill="#e6a756" color="#e6a756" />
-            <span className={styles.ratingValue}>{place.rating}</span>
-            <span className={styles.reviewCount}>({place.reviewCount})</span>
+            <span className={styles.ratingValue}>{place.reviewSummary.rating}</span>
+            <span className={styles.reviewCount}>({place.reviewSummary.reviewCount})</span>
           </div>
         </div>
 
         <div className={styles.metaRow}>
           <div className={styles.metaItem}>
             <MapPin size={14} color="#9da7b3" />
-            <span>{place.distance} ({place.travelTime})</span>
+            <span>{place.distanceKm} km ({place.travelTimeMinutes} min drive)</span>
           </div>
           {place.accommodation.available && (
             <div className={styles.metaItemHighlight}>
@@ -104,13 +103,13 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({
             <div className={styles.reasonDot} />
             <span className={styles.reasonTitle}>Why AI picked this:</span>
           </div>
-          <p className={styles.reasonText}>{place.matchReason}</p>
+          <p className={styles.reasonText}>{place.intentMatch.explanation}</p>
         </div>
 
         {/* Reputation Snippets (Pros / Cons) */}
         <div className={styles.reputationBox}>
           <div className={styles.prosList}>
-            {place.reputation.pros.slice(0, 2).map((pro, idx) => (
+            {place.reviewSummary.positiveThemes.slice(0, 2).map((pro, idx) => (
               <div key={idx} className={styles.proItem}>
                 <CheckCircle size={13} color="#34d399" className={styles.bulletIcon} />
                 <span>{pro}</span>
@@ -118,10 +117,10 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({
             ))}
           </div>
 
-          {place.potentialDownside && (
+          {place.intentMatch.potentialDownside && (
             <div className={styles.downsideItem}>
               <AlertTriangle size={13} color="#fb7185" className={styles.bulletIcon} />
-              <span>{place.potentialDownside}</span>
+              <span>{place.intentMatch.potentialDownside}</span>
             </div>
           )}
         </div>
