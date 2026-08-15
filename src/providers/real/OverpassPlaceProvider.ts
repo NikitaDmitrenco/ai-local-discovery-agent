@@ -32,12 +32,16 @@ export class OverpassPlaceProvider implements PlaceSearchProvider {
 
       const response = await fetch('https://overpass-api.de/api/interpreter', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'AILocalDiscoveryAgent/1.0 (Contact: discovery-agent@local.app)',
+        },
         body: `data=${encodeURIComponent(overpassQuery)}`,
+        signal: AbortSignal.timeout(1500),
       });
 
       if (!response.ok) {
-        throw new Error(`Overpass API responded with status ${response.status}`);
+        return [];
       }
 
       const data = await response.json();

@@ -9,6 +9,7 @@ export class NominatimGeocodingProvider implements GeocodingProvider {
       const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coordinates.lat}&lon=${coordinates.lng}`;
       const response = await fetch(url, {
         headers: { 'User-Agent': 'AILocalDiscoveryAgent/1.0' },
+        signal: AbortSignal.timeout(1500),
       });
 
       if (!response.ok) throw new Error(`Reverse geocode failed: ${response.status}`);
@@ -32,7 +33,6 @@ export class NominatimGeocodingProvider implements GeocodingProvider {
         coordinates,
       };
     } catch (error) {
-      console.warn('Nominatim reverse geocode fallback to default:', error);
       return {
         city: 'Chișinău',
         country: 'Moldova',
@@ -48,6 +48,7 @@ export class NominatimGeocodingProvider implements GeocodingProvider {
       const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encoded}&limit=1`;
       const response = await fetch(url, {
         headers: { 'User-Agent': 'AILocalDiscoveryAgent/1.0' },
+        signal: AbortSignal.timeout(1500),
       });
 
       if (!response.ok) throw new Error(`Forward geocode failed: ${response.status}`);

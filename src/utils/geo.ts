@@ -57,13 +57,20 @@ export function arePlacesDuplicates(
   const normA = normalizePlaceName(nameA);
   const normB = normalizePlaceName(nameB);
 
-  // Exact name match or substring within 500 meters
-  if (dist < 0.5 && (normA.includes(normB) || normB.includes(normA))) {
+  // Exact spaceless match within 2 km
+  const noSpaceA = normA.replace(/\s+/g, '');
+  const noSpaceB = normB.replace(/\s+/g, '');
+  if (dist < 2.0 && (noSpaceA === noSpaceB || noSpaceA.includes(noSpaceB) || noSpaceB.includes(noSpaceA))) {
     return true;
   }
 
-  // Very close location (< 150 meters) with similar tokens
-  if (dist < 0.15) {
+  // Exact name match or substring within 800 meters
+  if (dist < 0.8 && (normA.includes(normB) || normB.includes(normA))) {
+    return true;
+  }
+
+  // Close location (< 300 meters) with similar key tokens
+  if (dist < 0.3) {
     const tokensA = new Set(normA.split(' '));
     const tokensB = new Set(normB.split(' '));
     const intersection = Array.from(tokensA).filter((t) => tokensB.has(t) && t.length > 2);

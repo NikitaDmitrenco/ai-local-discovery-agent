@@ -35,7 +35,7 @@ export class PhotoVerifier {
 
       // 2. Source check: attached directly to place profile on map / official registry
       if (candidate.isAttachedToPlaceListing || candidate.source?.includes('Official') || candidate.source?.includes('Listing')) {
-        confidence += 0.65;
+        confidence += 0.80;
       } else {
         confidence += 0.2;
       }
