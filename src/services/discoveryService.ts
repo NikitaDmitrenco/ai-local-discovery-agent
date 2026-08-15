@@ -9,7 +9,8 @@ export class DiscoveryService {
   static async discoverPlaces(
     rawQuery: string,
     locationName = 'Chișinău, Moldova',
-    refinementKey?: string
+    refinementKey?: string,
+    sessionId?: string
   ): Promise<DiscoveryResult> {
     const placeProvider = ProviderFactory.getPlaceProvider();
     const llmProvider = ProviderFactory.getLLMProvider();
@@ -21,6 +22,6 @@ export class DiscoveryService {
       geocodingProvider
     );
 
-    return orchestrator.runDiscovery(rawQuery, locationName, refinementKey);
+    return orchestrator.runDiscovery(rawQuery, locationName, refinementKey, sessionId);
   }
 }

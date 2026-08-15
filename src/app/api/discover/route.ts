@@ -4,26 +4,28 @@ import { DiscoveryService } from '@/services/discoveryService';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { query, location, refinementKey } = body;
+    const { query, locationName, refinementKey, sessionId } = body;
 
     if (!query || typeof query !== 'string') {
       return NextResponse.json(
-        { error: 'A natural language query is required.' },
+        { error: 'Missing or invalid query string' },
         { status: 400 }
       );
     }
 
+    const targetLocation = locationName || 'Chișinău, Moldova';
     const result = await DiscoveryService.discoverPlaces(
       query,
-      location || 'Chișinău, Moldova',
-      refinementKey
+      targetLocation,
+      refinementKey,
+      sessionId
     );
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error in /api/discover route:', error);
+    console.error('Error executing DiscoveryService:', error);
     return NextResponse.json(
-      { error: 'An error occurred while executing the AI discovery agent.' },
+      { error: 'Failed to discover places. Please try again.' },
       { status: 500 }
     );
   }

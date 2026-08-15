@@ -10,8 +10,8 @@ import {
 import { PlaceVerifier } from '../verification/placeVerifier';
 import { IntentRanker } from '../ranking/intentRanker';
 import { RefinementEngine } from '../refinement/refinementEngine';
+import { ConversationMemoryManager } from '../memory/conversationMemory';
 import {
-  SearchIntent,
   PlaceCandidate,
   DiscoveryResult,
   AgentExecutionTrace,
@@ -48,12 +48,13 @@ export class DiscoveryAgentOrchestrator {
   }
 
   /**
-   * Runs the iterative multi-step agent discovery loop with rigorous verification, reputation analysis, and refinement support
+   * Runs the iterative multi-step agent discovery loop with multi-turn memory
    */
   async runDiscovery(
     rawQuery: string,
     locationName = 'Chișinău, Moldova',
-    refinementKey?: string
+    refinementKey?: string,
+    sessionId?: string
   ): Promise<DiscoveryResult> {
     const startTime = Date.now();
     const toolTraces: ToolInvocationTrace[] = [];
@@ -75,6 +76,12 @@ export class DiscoveryAgentOrchestrator {
     });
     toolTraces.push(intentExecution.trace);
     let intent = intentExecution.result;
+
+    // Multi-turn conversational memory merge if sessionId provided
+    if (sessionId) {
+      const { mergedIntent } = ConversationMemoryManager.mergeTurn(sessionId, rawQuery, intent);
+      intent = mergedIntent;
+    }
 
     // Apply modifier if refinement key passed
     if (refinementKey) {
@@ -210,6 +217,16 @@ export class DiscoveryAgentOrchestrator {
       rankedCandidates.sort((a, b) => b.reviewSummary.rating - a.reviewSummary.rating);
     } else if (refinementKey === 'more_activities') {
       rankedCandidates.sort((a, b) => b.activities.length - a.activities.length);
+    }
+
+    if (sessionId) {
+      ConversationMemoryManager.recordTurn(
+        sessionId,
+        rawQuery,
+        intent,
+        rankedCandidates.length,
+        rankedCandidates.map((c) => c.id)
+      );
     }
 
     const executionTimeMs = Date.now() - startTime;
