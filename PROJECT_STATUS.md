@@ -1,10 +1,10 @@
 # PROJECT STATUS
 
-Last updated: 2026-08-15 23:44
+Last updated: 2026-08-15 23:46
 
-Current milestone: Milestone 14 — Production Quality UX
+Current milestone: Milestone 15 — End-to-End QA
 
-Overall completion: 88%
+Overall completion: 94%
 
 ## Milestones
 
@@ -24,33 +24,45 @@ Overall completion: 88%
 | 11 Intent Ranking | DONE | 100% | Dynamic weighted scoring model & "Why it matches" explanation generator with automated tests |
 | 12 AI Refinement | DONE | 100% | Contextual refinement prompts and dynamic suggestion chips that alter search behavior & automated tests |
 | 13 Conversational Memory | DONE | 100% | Multi-turn conversational memory maintaining session history, constraints, and locations with automated tests |
-| 14 Production UX Polish | IN PROGRESS | 0% | Micro-animations, responsive layout perfection, keyboard accessibility, smooth transitions |
-| 15 End-to-End QA | NOT STARTED | 0% | 15 scenario test battery verification |
+| 14 Production UX Polish | DONE | 100% | Micro-animations, responsive perfection, a11y keyboard shortcuts, session turn counter & reset context |
+| 15 End-to-End QA | IN PROGRESS | 0% | 15 scenario test battery verification across intent, discovery, verification, reputation, and multi-turn flows |
 | 16 Final Documentation | NOT STARTED | 0% | Full handoff and developer runbooks |
 | 17 Vercel Deployment | NOT STARTED | 0% | Production cloud deployment & domain validation |
 
 ## Current Task
 
-Executing Milestone 14:
-- UX Polish & Micro-interactions:
-  - Add smooth card hover lifts, image fade-ins, and skeleton loaders.
-  - Implement full keyboard accessibility (`Escape` to close modals, `Tab` focus rings, `Enter` to trigger chips).
-  - Responsive audit across Mobile (375px), Tablet (768px), and Desktop (1440px).
-  - Add session ID persistence in `page.tsx` for seamless multi-turn chats in browser.
-  - Ensure zero layout shifts (CLS) and snappy rendering.
+Executing Milestone 15:
+- Build comprehensive End-to-End QA Test Suite in `src/qa/e2eTestSuite.ts`.
+- Execute the mandatory 15-scenario verification battery:
+  1. Primary demo query ("Хочу вечерком воскресным отдохнуть в тихом местечке где можно покататься на воде и поспать за городом").
+  2. Pure activity query ("Где покататься на вейке в выходные").
+  3. Atmosphere query ("Уединенное тихое место на озере без музыки").
+  4. Accommodation query ("Глэмпинг с куполами и баней на берегу").
+  5. Distance constraint query ("Водные развлечения не дальше 20 км от Кишинева").
+  6. Multi-turn refinement: Closer modifier.
+  7. Multi-turn refinement: Quieter modifier.
+  8. Multi-turn refinement: With sauna modifier.
+  9. Intent match score dynamic weights verification.
+  10. Photo authenticity and generic stock rejection test.
+  11. Review synthesis with sparse/limited evidence test.
+  12. Duplicate place detection and coordinates deduplication test.
+  13. Schedule & Sunday evening hours verification test.
+  14. Geocoding resolution test.
+  15. Agent trace completeness test.
+- Run automated battery and assert 15/15 PASS.
 
 ## Completed
 
-- Completed Milestone 0 through Milestone 13:
-  - Scaffolding, GitHub setup, Core UI, Domain Models, Real Places, Intent Parser, Semantic Query Expander, Agent Orchestrator, Place Verifier, Reputation Analyzer, Photo Verifier, Intent Ranker, Refinement Engine, and Conversational Memory.
+- Completed Milestone 0 through Milestone 14:
+  - Scaffolding, GitHub setup, Core UI, Domain Models, Real Places, Intent Parser, Semantic Query Expander, Agent Orchestrator, Place Verifier, Reputation Analyzer, Photo Verifier, Intent Ranker, Refinement Engine, Conversational Memory, and Production UX Polish.
   - Verified all unit test suites, builds, typechecks, and lints pass with 0 errors.
 
 ## Remaining
 
-- Milestone 14 implementation:
-  - Polish CSS styling and responsive micro-animations in `globals.css` and component modules.
-  - Connect `sessionId` state in `src/app/page.tsx`.
-  - Add keyboard shortcuts (`Escape`, `Tab`).
+- Milestone 15 implementation:
+  - Create `src/qa/e2eTestSuite.ts`.
+  - Run `npx tsx src/qa/e2eTestSuite.ts`.
+  - Verify all 15 scenarios pass 100%.
   - Run build, typecheck, lint, commit & push.
 
 ## Blockers
@@ -67,26 +79,21 @@ Next.js 14+ (App Router) + TypeScript + Layered Agent Architecture (UI -> API ->
 
 ## Next Action
 
-Enhance `src/app/page.tsx` and UI CSS styles for Milestone 14 polish.
+Create and execute `src/qa/e2eTestSuite.ts`.
 
 ## Acceptance Criteria For Current Milestone
 
-- [ ] Mobile, tablet, and desktop responsive layout is pixel-perfect.
-- [ ] Modals close cleanly with `Escape` or backdrop click.
-- [ ] Multi-turn session state persists seamlessly across searches.
+- [ ] All 15 distinct scenario tests execute and pass with 0 failures.
+- [ ] Primary demo query discovers and ranks countryside water accommodation at #1.
 - [ ] Build & typecheck pass with 0 errors.
 
 ## Last Session Summary
 
-Completed Milestone 13 (Conversational Memory) with multi-turn intent accumulation, constraint preservation, and automated tests. Transitioned to Milestone 14.
+Completed Milestone 14 (Production Quality UX) with responsive layouts, modal keyboard shortcuts, turn counters, and context reset. Transitioned to Milestone 15.
 
 ## Files Changed
 
-- `src/agent/memory/conversationMemory.ts`
-- `src/agent/memory/conversationMemory.test.ts`
-- `src/agent/orchestrator/agentOrchestrator.ts`
-- `src/services/discoveryService.ts`
-- `src/app/api/discover/route.ts`
+- `src/app/page.tsx`
 - `PROJECT_STATUS.md`
 
 ## Decisions Made
@@ -103,3 +110,4 @@ Completed Milestone 13 (Conversational Memory) with multi-turn intent accumulati
 - DEC-010: Dynamic Weighted Intent-Match Scoring.
 - DEC-011: Contextual Dynamic Refinement Engine.
 - DEC-012: Multi-Turn In-Memory Session & Intent Accumulator.
+- DEC-013: Session-Aware UI State Machine with Context Reset.
