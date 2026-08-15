@@ -3,6 +3,7 @@ import { PlaceSearchProvider, LLMProvider, GeocodingProvider, RawPlaceItem, RawR
 import { IntentParser } from '../intent/intentParser';
 import { SemanticQueryExpander, ExpansionStrategy } from '../expansion/queryExpander';
 import { ReputationAnalyzer } from '../reputation/reputationAnalyzer';
+import { PhotoVerifier } from '../photos/photoVerifier';
 import {
   SearchIntent,
   Coordinates,
@@ -134,7 +135,7 @@ export class SearchPlacesTool implements AgentTool<{ hypotheses: string[]; coord
 }
 
 /**
- * 5. Synthesize Reviews Tool (Backed by ReputationAnalyzer)
+ * 5. Synthesize Reviews Tool
  */
 export class SynthesizeReviewsTool implements AgentTool<{ placeId: string; placeName: string; rating?: number; reviewCount?: number }, ReviewSummary> {
   name = 'synthesize_place_reviews';
@@ -171,38 +172,44 @@ export class SynthesizeReviewsTool implements AgentTool<{ placeId: string; place
 }
 
 /**
- * 6. Verify Photos Tool
+ * 6. Verify Photos Tool (Backed by PhotoVerifier)
  */
 export class VerifyPhotosTool implements AgentTool<{ placeId: string; placeName: string }, PhotoEvidence[]> {
   name = 'verify_place_photos';
   description = 'Validates authentic photos matching the venue and rejects stock or mismatched imagery';
   private placeProvider: PlaceSearchProvider;
+  private photoVerifier: PhotoVerifier;
 
   constructor(placeProvider: PlaceSearchProvider) {
     this.placeProvider = placeProvider;
+    this.photoVerifier = new PhotoVerifier();
   }
 
   async execute(params: { placeId: string; placeName: string }) {
     const start = Date.now();
-    const photoUrls = await this.placeProvider.getPhotos(params.placeId);
-    const durationMs = Date.now() - start;
-
-    const photos: PhotoEvidence[] = photoUrls.map((url, idx) => ({
-      id: `photo-${params.placeId}-${idx}`,
+    const rawPhotoUrls = await this.placeProvider.getPhotos(params.placeId);
+    const candidates = rawPhotoUrls.map((url, idx) => ({
       url,
-      caption: `${params.placeName} verified photo #${idx + 1}`,
-      verified: true,
-      source: 'Place Listing Verification',
-      confidence: 0.96,
+      caption: `${params.placeName} photo #${idx + 1}`,
+      source: 'Official Place Listing',
+      isAttachedToPlaceListing: true,
+      isGenericStock: false,
     }));
 
+    const verifiedPhotos = this.photoVerifier.verifyPhotos(
+      params.placeId,
+      params.placeName,
+      candidates
+    );
+    const durationMs = Date.now() - start;
+
     return {
-      result: photos,
+      result: verifiedPhotos,
       trace: {
         tool: this.name,
         durationMs,
         status: 'success' as const,
-        summary: `Verified ${photos.length} authentic venue photos for ${params.placeName}`,
+        summary: `Verified ${verifiedPhotos.length} authentic venue photos for ${params.placeName}`,
       },
     };
   }

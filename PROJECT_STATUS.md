@@ -1,10 +1,10 @@
 # PROJECT STATUS
 
-Last updated: 2026-08-15 23:35
+Last updated: 2026-08-15 23:37
 
-Current milestone: Milestone 10 — Photo Discovery and Verification
+Current milestone: Milestone 11 — Intent Matching and Ranking
 
-Overall completion: 66%
+Overall completion: 72%
 
 ## Milestones
 
@@ -20,8 +20,8 @@ Overall completion: 66%
 | 7 Agent Orchestration | DONE | 100% | Multi-step autonomous agent loop with tool execution, decision state machine, step limits, and automated tests |
 | 8 Place Verification | DONE | 100% | Multi-factor claim verification engine (Identity, Location, Activity, Accommodation, Schedule, Atmosphere) & automated tests |
 | 9 Reviews & Reputation | DONE | 100% | Reputation summarization, positive highlights extraction, caveats detection & confidence volume weighting with automated tests |
-| 10 Photo Relevance | IN PROGRESS | 0% | Strict place photo verification pipeline, generic stock rejection, and confidence scoring |
-| 11 Intent Ranking | NOT STARTED | 0% | Dynamic weighted scoring and "Why it matches" |
+| 10 Photo Relevance | DONE | 100% | Strict place photo verification pipeline, generic stock rejection, confidence scoring & automated tests |
+| 11 Intent Ranking | IN PROGRESS | 0% | Dynamic weighted scoring model (activity, atmosphere, accommodation, distance, reputation) & "Why it matches" explanation generator |
 | 12 AI Refinement | NOT STARTED | 0% | Contextual refinement prompts changing agent behavior |
 | 13 Conversational Memory | NOT STARTED | 0% | Multi-turn contextual search continuation |
 | 14 Production UX Polish | NOT STARTED | 0% | Micro-animations, responsive perfection, a11y |
@@ -31,29 +31,30 @@ Overall completion: 66%
 
 ## Current Task
 
-Executing Milestone 10:
-- Build `PhotoVerifier` in `src/agent/photos/photoVerifier.ts`.
-- Implement photo relevance pipeline:
-  - Source check & place listing attachment.
-  - Contextual keyword & venue name verification.
-  - Generic stock photo rejection (rejecting generic wakeboarding or random hotel stock images).
-  - Strict photo confidence scoring (0.0 to 1.0).
-  - Photo ranking (prioritizing authentic official/user venue photos).
-  - Prefer "No verified photo" over showing a wrong/generic photo.
-- Automated test in `src/agent/photos/photoVerifier.test.ts`.
+Executing Milestone 11:
+- Build `IntentRanker` in `src/agent/ranking/intentRanker.ts`.
+- Implement dynamic weighted match scoring algorithm:
+  - Activity match score (0.0 to 1.0)
+  - Atmosphere match score (0.0 to 1.0)
+  - Accommodation match score (0.0 to 1.0)
+  - Distance & accessibility score (0.0 to 1.0)
+  - Reputation & confidence score (0.0 to 1.0)
+  - Dynamic weights dynamically derived from individual user emphasis in `SearchIntent`.
+- Build "Why AI picked this" explanation generator linking user intent directly to venue features.
+- Automated test in `src/agent/ranking/intentRanker.test.ts`.
 
 ## Completed
 
-- Completed Milestone 0 through Milestone 9:
-  - Scaffolding, GitHub setup, Core UI, Domain Models, Real Places, Intent Parser, Semantic Query Expander, Agent Orchestrator, Place Verifier, and Reputation Analyzer.
+- Completed Milestone 0 through Milestone 10:
+  - Scaffolding, GitHub setup, Core UI, Domain Models, Real Places, Intent Parser, Semantic Query Expander, Agent Orchestrator, Place Verifier, Reputation Analyzer, and Photo Verifier.
   - Verified all unit test suites, builds, typechecks, and lints pass with 0 errors.
 
 ## Remaining
 
-- Milestone 10 implementation:
-  - Create `PhotoVerifier` in `src/agent/photos/photoVerifier.ts`.
-  - Create `photoVerifier.test.ts`.
-  - Wire verifier into `VerifyPhotosTool` and `DiscoveryAgentOrchestrator`.
+- Milestone 11 implementation:
+  - Create `IntentRanker` in `src/agent/ranking/intentRanker.ts`.
+  - Create `intentRanker.test.ts`.
+  - Wire ranker into `DiscoveryAgentOrchestrator`.
   - Run build, typecheck, lint, commit & push.
 
 ## Blockers
@@ -66,30 +67,29 @@ None.
 
 ## Current Architecture
 
-Next.js 14+ (App Router) + TypeScript + Layered Agent Architecture (UI -> API -> Orchestrator -> Verifiers/Reputation -> Providers).
+Next.js 14+ (App Router) + TypeScript + Layered Agent Architecture (UI -> API -> Orchestrator -> Verifiers/Reputation/Ranking -> Providers).
 
 ## Next Action
 
-Implement `PhotoVerifier` in `src/agent/photos/photoVerifier.ts`.
+Implement `IntentRanker` in `src/agent/ranking/intentRanker.ts`.
 
 ## Acceptance Criteria For Current Milestone
 
-- [ ] Strict place-level photo verification pipeline.
-- [ ] Generic stock photos or mismatched venue photos are rejected.
-- [ ] Displays verified place photos or graceful "No verified photo" placeholder.
-- [ ] Automated photo verification test passes.
+- [ ] Match score dynamically reflects user intent weights rather than mere venue popularity.
+- [ ] Top result reflects user priorities (e.g. water activity + quiet + overnight).
+- [ ] Meaningful, personalized "Why this place matches" explanation generated for each place.
+- [ ] Automated ranking test passes.
 - [ ] Build & typecheck pass with 0 errors.
 
 ## Last Session Summary
 
-Completed Milestone 9 (Reviews and Reputation) with AI reputation synthesis, positive themes, caveats, and automated tests. Transitioned to Milestone 10.
+Completed Milestone 10 (Photo Discovery and Verification) with generic stock rejection, confidence scoring, and automated tests. Transitioned to Milestone 11.
 
 ## Files Changed
 
-- `src/agent/reputation/reputationAnalyzer.ts`
-- `src/agent/reputation/reputationAnalyzer.test.ts`
+- `src/agent/photos/photoVerifier.ts`
+- `src/agent/photos/photoVerifier.test.ts`
 - `src/agent/tools/discoveryTools.ts`
-- `src/agent/orchestrator/agentOrchestrator.ts`
 - `PROJECT_STATUS.md`
 
 ## Decisions Made
@@ -101,4 +101,5 @@ Completed Milestone 9 (Reviews and Reputation) with AI reputation synthesis, pos
 - DEC-005: Multi-Strategy Semantic Expansion.
 - DEC-006: Dedicated Tool Abstraction with execution trace duration metrics.
 - DEC-007: 6-Dimensional Place Verification.
-- DEC-008: Evidence-Grounded Reputation & Caveats Synthesis.
+- DEC-008: Evidence-Grounded Reputation Synthesis.
+- DEC-009: Strict Venue Photo Verification Pipeline (rejecting generic stock).
