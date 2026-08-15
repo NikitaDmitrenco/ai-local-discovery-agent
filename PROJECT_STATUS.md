@@ -1,10 +1,10 @@
 # PROJECT STATUS
 
-Last updated: 2026-08-15 23:28
+Last updated: 2026-08-15 23:30
 
-Current milestone: Milestone 7 — Agent Orchestration
+Current milestone: Milestone 8 — Place Verification
 
-Overall completion: 48%
+Overall completion: 54%
 
 ## Milestones
 
@@ -15,10 +15,10 @@ Overall completion: 48%
 | 2 Core UI | DONE | 100% | Hero search, multi-step progress, place cards, details modal, refinement chips, trace modal |
 | 3 Domain & Providers | DONE | 100% | Typed domain models, provider abstractions, mock implementations, service layer & API route |
 | 4 Real Place Discovery | DONE | 100% | Real OSM Overpass provider, Serper Google Places, Nominatim geocoder, Haversine geo distance & deduplication |
-| 5 LLM Intent Engine | DONE | 100% | Multi-provider LLM intent parser (Gemini / OpenAI / Groq / Fallback) with strict schema and verified demo assertions |
+| 5 LLM Intent Engine | DONE | 100% | Multi-provider LLM intent parser with strict schema & unit test |
 | 6 Semantic Expansion | DONE | 100% | Semantic category expander, multi-hypothesis generator, and category bridging with automated tests |
-| 7 Agent Orchestration | IN PROGRESS | 0% | Multi-step autonomous agent loop with tool execution, decision state machine, step limits, and safeguards |
-| 8 Place Verification | NOT STARTED | 0% | Multi-factor claim & evidence verification |
+| 7 Agent Orchestration | DONE | 100% | Multi-step autonomous agent loop with tool execution, decision state machine, step limits, and automated tests |
+| 8 Place Verification | IN PROGRESS | 0% | Multi-factor claim & evidence verification engine |
 | 9 Reviews & Reputation | NOT STARTED | 0% | Reputation summarization & pros/cons synthesis |
 | 10 Photo Relevance | NOT STARTED | 0% | Strict place-level photo verification pipeline |
 | 11 Intent Ranking | NOT STARTED | 0% | Dynamic weighted scoring and "Why it matches" |
@@ -31,41 +31,30 @@ Overall completion: 48%
 
 ## Current Task
 
-Executing Milestone 7:
-- Build `DiscoveryAgentOrchestrator` in `src/agent/orchestrator/agentOrchestrator.ts`.
-- Implement full iterative tool-calling loop:
-  - `intent_extraction` -> `query_expansion` -> `candidate_search` -> `observe_candidates` -> `decide_next_tool` -> `verify_claims` -> `synthesize_reviews` -> `rank_results`.
-- Add configurable execution limits & loop guards (max tool steps, deduplication of identical tool calls, timeout safeguards).
-- Structured tool registry (`src/agent/tools/`):
-  - `GeocodeTool`
-  - `IntentTool`
-  - `ExpandQueryTool`
-  - `SearchPlacesTool`
-  - `PlaceDetailsTool`
-  - `ReviewsTool`
-  - `PhotosTool`
-- Record detailed, high-level non-leaking execution traces with durations and statuses.
+Executing Milestone 8:
+- Build `PlaceVerifier` in `src/agent/verification/placeVerifier.ts`.
+- Verify candidate places against user intent across 6 distinct dimensions:
+  1. **Identity & Existence**: Is this actually the referenced real place?
+  2. **Location & Distance**: Real coordinates, travel time, and accessibility.
+  3. **Activity Capability**: Does it offer requested water sports / wakeboard / kayaking / sauna?
+  4. **Accommodation & Overnight**: Can the user stay overnight? (Cabins, glamping, rooms).
+  5. **Schedule & Timing**: Is it open and active during Sunday evening / weekend?
+  6. **Atmosphere & Setting**: Does available review evidence confirm quiet / nature / outside city?
+- Zero hallucination policy: explicitly flag unverified claims as `unverified` or `evidence insufficient` rather than inventing facts.
+- Unit test suite in `src/agent/verification/placeVerifier.test.ts`.
 
 ## Completed
 
-- Completed Milestone 0 (Project Foundation)
-- Completed Milestone 1 (GitHub Development Workflow)
-- Completed Milestone 2 (Core UI Shell)
-- Completed Milestone 3 (Domain Model & Provider Abstraction)
-- Completed Milestone 4 (Real Place Discovery)
-- Completed Milestone 5 (LLM Intent Engine)
-- Completed Milestone 6 (Semantic Query Expansion):
-  - `SemanticQueryExpander` engine generating 10+ semantic category and activity hypotheses.
-  - Automated test `queryExpander.test.ts` asserting wake park / lake resort discovery without literal words.
-  - Verified build, typecheck, and lint passing.
+- Completed Milestone 0 through Milestone 7:
+  - Scaffolding, GitHub setup, Core UI, Domain Models, Real Places (OSM/Nominatim/Serper), Intent Parser, Semantic Query Expander, and Agent Orchestrator.
+  - Verified all unit test suites, builds, typechecks, and lints pass with 0 errors.
 
 ## Remaining
 
-- Milestone 7 implementation:
-  - Create Tool Registry in `src/agent/tools/`.
-  - Create `DiscoveryAgentOrchestrator` in `src/agent/orchestrator/agentOrchestrator.ts`.
-  - Wire orchestrator into `DiscoveryService`.
-  - Create automated orchestrator test in `src/agent/orchestrator/agentOrchestrator.test.ts`.
+- Milestone 8 implementation:
+  - Create `PlaceVerifier` in `src/agent/verification/placeVerifier.ts`.
+  - Create `placeVerifier.test.ts`.
+  - Wire verifier into `DiscoveryAgentOrchestrator`.
   - Run build, typecheck, lint, commit & push.
 
 ## Blockers
@@ -78,29 +67,30 @@ None.
 
 ## Current Architecture
 
-Next.js 14+ (App Router) + TypeScript + Layered Agent Architecture (UI -> Service Layer -> Agent Orchestrator -> Tools -> Provider Abstraction -> External/Mock APIs).
+Next.js 14+ (App Router) + TypeScript + Layered Agent Architecture (UI -> API -> Orchestrator -> Tools/Verification -> Providers).
 
 ## Next Action
 
-Create tool definitions in `src/agent/tools/` and `DiscoveryAgentOrchestrator` in `src/agent/orchestrator/agentOrchestrator.ts`.
+Implement `PlaceVerifier` in `src/agent/verification/placeVerifier.ts`.
 
 ## Acceptance Criteria For Current Milestone
 
-- [ ] Multi-step agent workflow loop is implemented (not a single-shot prompt).
-- [ ] Agent dynamically selects and invokes appropriate tools.
-- [ ] Step limits (max 8 iterations) prevent infinite loops or redundant searches.
-- [ ] High-level execution trace captures tool durations and counts.
-- [ ] Automated orchestrator test passes.
+- [ ] Multi-factor verification (Identity, Location, Activity, Accommodation, Schedule, Atmosphere).
+- [ ] Claims have explicit confidence scores and grounding evidence.
+- [ ] Unverified facts are explicitly represented without hallucination.
+- [ ] Automated verification test passes.
 - [ ] Build & typecheck pass with 0 errors.
 
 ## Last Session Summary
 
-Completed Milestone 6 (Semantic Query Expansion) with automated testing and service integration. Transitioned to Milestone 7.
+Completed Milestone 7 (Agent Orchestration) with multi-step tool execution, step limits, and automated tests. Transitioned to Milestone 8.
 
 ## Files Changed
 
-- `src/agent/expansion/queryExpander.ts`
-- `src/agent/expansion/queryExpander.test.ts`
+- `src/agent/tools/agentTool.ts`
+- `src/agent/tools/discoveryTools.ts`
+- `src/agent/orchestrator/agentOrchestrator.ts`
+- `src/agent/orchestrator/agentOrchestrator.test.ts`
 - `src/services/discoveryService.ts`
 - `PROJECT_STATUS.md`
 
@@ -110,4 +100,5 @@ Completed Milestone 6 (Semantic Query Expansion) with automated testing and serv
 - DEC-002: Pluggable Multi-Provider Domain Layer.
 - DEC-003: Multi-Source Aggregated Place Provider.
 - DEC-004: Dual-Engine Intent Extraction.
-- DEC-005: Multi-Strategy Semantic Expansion (Activity, Venue, Stay, Atmosphere).
+- DEC-005: Multi-Strategy Semantic Expansion.
+- DEC-006: Dedicated Tool Abstraction with execution trace duration metrics.
