@@ -1,7 +1,7 @@
 # Aura — Autonomous AI Local Discovery Agent
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Live_Demo-Vercel_Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" />
+  <a href="https://aura-three-weld.vercel.app/"><img src="https://img.shields.io/badge/Live_Demo-aura--three--weld.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" /></a>
   <img src="https://img.shields.io/badge/Next.js-14_App_Router-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js 14" />
   <img src="https://img.shields.io/badge/TypeScript-5.0+-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/E2E_Tests-15%2F15_Passing_(100%25)-059669?style=for-the-badge&logo=vitest&logoColor=white" alt="E2E Tests" />
@@ -14,7 +14,7 @@
 
 ## 🌐 Live Application & Deployment
 
-* **Production URL:** [https://aura-production.vercel.app](https://aura-production.vercel.app) *(or your custom Vercel domain)*
+* **Live Demo:** [https://aura-three-weld.vercel.app/](https://aura-three-weld.vercel.app/)
 * **Source Repository:** [https://github.com/NikitaDmitrenco/aura](https://github.com/NikitaDmitrenco/aura)
 * **Author Portfolio:** [Nikita Dmitrenco (GitHub Profile)](https://github.com/NikitaDmitrenco)
 
