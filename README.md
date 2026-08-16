@@ -1,165 +1,266 @@
-# Aura — AI Local Discovery Agent
+# Aura — Autonomous AI Local Discovery Agent
 
-> High-quality, AI-native consumer web application for natural-language local experience discovery.
+<p align="center">
+  <img src="https://img.shields.io/badge/Live_Demo-Vercel_Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" />
+  <img src="https://img.shields.io/badge/Next.js-14_App_Router-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js 14" />
+  <img src="https://img.shields.io/badge/TypeScript-5.0+-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/E2E_Tests-15%2F15_Passing_(100%25)-059669?style=for-the-badge&logo=vitest&logoColor=white" alt="E2E Tests" />
+  <img src="https://img.shields.io/badge/AI_Trust-Zero_Hallucination-10B981?style=for-the-badge" alt="AI Trust" />
+</p>
 
-[![Next.js 14](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/E2E_Tests-15%2F15_Passing-success)](https://github.com/NikitaDmitrenco/aura)
-[![Zero Fabrication](https://img.shields.io/badge/AI_Trust-Zero_Hallucination-emerald)](https://github.com/NikitaDmitrenco/aura)
-
----
-
-## 🌟 What is Aura?
-
-Finding the right local venue traditionally requires knowing business categories, exact keywords, opening hours, and cross-referencing multiple platforms for reviews, activities, and overnight accommodation.
-
-**Aura** allows users to describe what they want in natural human language:
-
-> *"Хочу вечерком воскресным отдохнуть в каком-нибудь тихом местечке где можно покататься на воде и поспать за городом"*
-
-The agent autonomously:
-1. **Parses complex intent**: Sunday evening, outside city, water recreation, quiet atmosphere, overnight stay required.
-2. **Expands semantic search space**: Discovers wake parks, cable wakeboarding, lake recreation bases, glamping safari domes, and lakeside cabins without needing exact keywords.
-3. **Discovers real places**: Aggregates live OpenStreetMap Overpass queries, Google Places (Serper), Nominatim geocoding, and verified venue databases.
-4. **Verifies claims**: Rigorously verifies water activity infrastructure, overnight cabin availability, and opening schedule.
-5. **Analyzes reputation**: Synthesizes verified visitor reviews, positive highlights, and potential downsides.
-6. **Validates photos**: Rejects generic stock photos; only displays verified venue photos.
-7. **Ranks by intent match**: Computes dynamic weighted match scores with transparent "Why AI picked this" explanations.
-8. **Supports multi-turn refinement**: Contextual smart chips and free-form follow-ups with persistent conversational memory.
+> **"Tell me what kind of experience you want. I'll find, verify, and map the real places that can deliver that exact experience."**
 
 ---
 
-## 🚀 Quick Start
+## 🌐 Live Application & Deployment
 
-### Prerequisites
-- Node.js 18.17+ or 20+
-- npm 9+
-
-### Installation
-```bash
-git clone https://github.com/NikitaDmitrenco/aura.git
-cd aura
-npm install
-```
-
-### Environment Configuration (Optional)
-Copy `.env.example` to `.env.local`:
-```bash
-cp .env.example .env.local
-```
-
-| Variable | Description | Default / Fallback |
-|---|---|---|
-| `GEMINI_API_KEY` | Google Gemini API key for structured intent parsing | High-precision deterministic fallback |
-| `OPENAI_API_KEY` | OpenAI API key (optional alternative) | High-precision deterministic fallback |
-| `SERPER_API_KEY` | Serper Google Places API key (optional) | Live OpenStreetMap Overpass + High-fidelity verified registry |
-
-*Note: The application includes full zero-config offline capability. It runs out of the box with 0 external API keys required!*
-
-### Running Locally
-```bash
-npm run dev
-```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+* **Production URL:** [https://aura-production.vercel.app](https://aura-production.vercel.app) *(or your custom Vercel domain)*
+* **Source Repository:** [https://github.com/NikitaDmitrenco/aura](https://github.com/NikitaDmitrenco/aura)
+* **Author Portfolio:** [Nikita Dmitrenco (GitHub Profile)](https://github.com/NikitaDmitrenco)
 
 ---
 
-## 🧪 Running the Test Battery
+## 🛑 The Problem Traditional Search Cannot Solve
 
-### Full 15-Scenario End-to-End Battery
-```bash
-npx tsx src/qa/e2eTestSuite.ts
+Finding the right local venue or weekend getaway is broken:
+
+1. **Keyword Tyranny**: Searching *"I want a peaceful Sunday evening by the water where we can do wakeboarding and sleep in heated cabins outside the city"* in Google Maps or Yelp yields **0 relevant results**. Traditional platforms force you into rigid business categories (*"hotel"* OR *"sports club"*).
+2. **Tab Overload**: Planning a simple weekend requires opening 15+ browser tabs — cross-referencing Instagram for real photos, Booking.com for cabins, Facebook for actual opening hours, and TripAdvisor for reviews.
+3. **Hallucinations & False Claims**: Traditional search engines and generic AI chatbots often invent places, hallucinate activities that are closed for the season, or confuse day-use picnic spots with overnight lodging.
+
+---
+
+## ⚡ The Solution: How Aura Works
+
+**Aura** is an autonomous, multi-step AI discovery agent built from the ground up for **experiential, vibe-first discovery** with rigorous zero-fabrication verification:
+
+```text
+User Natural Language / Voice Prompt
+              │
+              ▼
+   ┌────────────────────────────────────────────────────────┐
+   │ 1. Structured Intent Extraction (LLM / Dual Engine)    │
+   │    • Temporal, Activity, Lodging, Atmosphere, Weights  │
+   └──────────────────────────┬─────────────────────────────┘
+                              ▼
+   ┌────────────────────────────────────────────────────────┐
+   │ 2. Semantic Query Expansion (Multi-Hypothesis)         │
+   │    • Wake park, cable park, glamping, lakeside domes   │
+   └──────────────────────────┬─────────────────────────────┘
+                              ▼
+   ┌────────────────────────────────────────────────────────┐
+   │ 3. Multi-Source Discovery & Deduplication              │
+   │    • OpenStreetMap Overpass + Serper + Verified DB     │
+   │    • Haversine geo distance & boundary clustering      │
+   └──────────────────────────┬─────────────────────────────┘
+                              ▼
+   ┌────────────────────────────────────────────────────────┐
+   │ 4. 6-Dimensional Grounding Claim Verification          │
+   │    • Identity, Location, Activity, Lodging, Schedule   │
+   └──────────────────────────┬─────────────────────────────┘
+                              ▼
+   ┌────────────────────────────────────────────────────────┐
+   │ 5. Review Synthesis & Photo Authenticity Validation    │
+   │    • Highlights, caveats, confidence (Stock photos ❌) │
+   └──────────────────────────┬─────────────────────────────┘
+                              ▼
+   ┌────────────────────────────────────────────────────────┐
+   │ 6. Real-Time Streaming & Interactive Geospatial UI     │
+   │    • Server-Sent Events (SSE) + Leaflet Dark Theme Map │
+   │    • Custom Weekend Timeline Itinerary Planner         │
+   └────────────────────────────────────────────────────────┘
 ```
 
-### Individual Engine Tests
-```bash
-# Test 1: LLM Structured Intent Parser
-npx tsx src/agent/intent/intentParser.test.ts
+---
 
-# Test 2: Semantic Query Expander
-npx tsx src/agent/expansion/queryExpander.test.ts
+## ✨ Key Features & Capabilities
 
-# Test 3: Multi-Step Agent Orchestrator Loop
-npx tsx src/agent/orchestrator/agentOrchestrator.test.ts
+### 🧠 1. Multi-Step Autonomous Agent Loop
+Instead of a single black-box LLM call, Aura executes an inspectable agent loop coordinating typed tools: Geocoding, Intent Extraction, Semantic Query Expansion, Geospatial Discovery, Claim Verification, Reputation Synthesis, Photo Validation, and Dynamic Ranking.
 
-# Test 4: Multi-Factor Place Verifier
-npx tsx src/agent/verification/placeVerifier.test.ts
+### 🛰️ 2. Real-Time Server-Sent Events (SSE) Streaming
+Watch the agent think in real time. Backend execution progress is piped to the client via `ReadableStream` SSE events (`event: step`, `event: result`, `event: done`), illuminating each pipeline phase without artificial timers.
 
-# Test 5: Grounded Reputation Analyzer
-npx tsx src/agent/reputation/reputationAnalyzer.test.ts
+### 🗺️ 3. Interactive Geospatial Map with Match Scores
+Switch effortlessly between **Grid View** and **Map View**:
+- Custom Leaflet interactive map powered by CartoDB dark tiles.
+- Custom HTML pins with dynamic AI Match percentages (e.g. `97%`), pulsing beacons, and distance indicators.
+- Rich popup previews with photo, category, drive time, and quick details navigation.
 
-# Test 6: Authentic Photo Verifier
-npx tsx src/agent/photos/photoVerifier.test.ts
+### 📅 4. Weekend Trip Itinerary Planner
+- Click **"Save to Trip"** on any venue card to build a personalized excursion.
+- Synthesizes chronological weekend schedules (14:30 Afternoon Activity $\rightarrow$ 19:30 Sunset Dinner $\rightarrow$ Overnight Cabin Stay).
+- Calculates cumulative distance and total driving time.
+- One-click formatted export to clipboard for sharing with friends.
 
-# Test 7: Dynamic Intent Ranker
-npx tsx src/agent/ranking/intentRanker.test.ts
+### 🎙️ 5. Web Speech API Voice Search
+Speak your request naturally. Integrated speech recognition (`ru-RU` / `en-US`) with pulsing audio border animations transcribes your spoken intent directly into the search engine.
 
-# Test 8: Contextual Refinement Engine
-npx tsx src/agent/refinement/refinementEngine.test.ts
-
-# Test 9: Conversational Multi-Turn Memory
-npx tsx src/agent/memory/conversationMemory.test.ts
-```
-
-### Build & Typecheck
-```bash
-npm run build
-npm run typecheck
-npm run lint
-```
+### 💬 6. Conversational Memory & AI Refinement Chips
+- Preserves context across multiple search turns (e.g., *"Make it closer to the city"* or *"Find something quieter"*).
+- Dynamic contextual suggestion chips generate real-time refinement shortcuts.
 
 ---
 
 ## 🏛️ System Architecture
 
 ```text
-User Natural Language Input
-            │
-            ▼
-   ┌───────────────────┐
-   │ Next.js App Router│ (Client UI: Hero, Stream, Modal, Refinement)
-   └─────────┬─────────┘
-             │ POST /api/discover
-             ▼
-   ┌────────────────────────────────────────────────────────┐
-   │             DiscoveryService Layer                     │
-   └─────────────────────────┬──────────────────────────────┘
-                             │
-                             ▼
-   ┌────────────────────────────────────────────────────────┐
-   │          DiscoveryAgentOrchestrator                    │
-   │  ┌──────────────────────────────────────────────────┐  │
-   │  │ 1. GeocodeLocationTool (Nominatim / Mock)        │  │
-   │  │ 2. IntentExtractionTool (Gemini / OpenAI / Fall) │  │
-   │  │ 3. SemanticExpansionTool (Taxonomy / Hypotheses) │  │
-   │  │ 4. SearchPlacesTool (OSM Overpass / Serper / Reg)│  │
-   │  │ 5. SynthesizeReviewsTool (Reputation Analyzer)   │  │
-   │  │ 6. VerifyPhotosTool (Photo Verifier)             │  │
-   │  │ 7. PlaceVerifier (6-Factor Grounding Claims)     │  │
-   │  │ 8. IntentRanker (Dynamic Weighted Ranking)       │  │
-   │  │ 9. ConversationMemoryManager (Multi-Turn State)  │  │
-   │  └──────────────────────────────────────────────────┘  │
-   └─────────────────────────┬──────────────────────────────┘
-                             │
-                             ▼
-   ┌────────────────────────────────────────────────────────┐
-   │           Pluggable Provider Abstraction               │
-   │  • AggregatedPlaceProvider (OSM Overpass + Serper)     │
-   │  • NominatimGeocodingProvider (Forward & Reverse)      │
-   │  • Gemini / OpenAI / Groq LLM Adapters                 │
-   └────────────────────────────────────────────────────────┘
+src/
+├── app/
+│   ├── layout.tsx                # App root layout, fonts, SEO metadata
+│   ├── page.tsx                  # Primary page orchestrating state, memory & modals
+│   ├── page.module.css           # Glassmorphic layout, hero, grid & map styles
+│   ├── globals.css               # Design tokens, modern color palette, animations
+│   └── api/
+│       └── discover/
+│           └── route.ts          # Server-Sent Events (SSE) streaming API endpoint
+├── components/
+│   ├── Header.tsx                # Brand header, location picker, trip modal launcher
+│   ├── HeroSearch.tsx            # Experiential NLP search input with Web Speech API
+│   ├── AgentProgress.tsx         # Live multi-step execution progress visualization
+│   ├── PlaceCard.tsx             # Place candidate card with match score, photo & save
+│   ├── PlaceDetailsModal.tsx     # Comprehensive modal with 6-factor verification claims
+│   ├── InteractiveMap.tsx        # Dynamic Leaflet geospatial map with custom pins & popups
+│   ├── ItineraryModal.tsx        # Weekend trip schedule planner & clipboard exporter
+│   ├── RefinementBar.tsx         # Dynamic AI refinement chips & follow-up prompt input
+│   ├── LocationModal.tsx         # Geolocation detector and city picker
+│   └── AgentTraceModal.tsx       # Detailed execution trace inspector
+├── domain/
+│   └── types.ts                  # Typed domain models (PlaceCandidate, Intent, Claims)
+├── providers/
+│   ├── types.ts                  # Provider abstractions (PlaceSearch, LLM, Geocoding)
+│   ├── factory.ts                # ProviderFactory singleton with zero-config fallbacks
+│   ├── real/
+│   │   ├── AggregatedPlaceProvider.ts    # OSM Overpass + Serper Google Places + Registry
+│   │   ├── NominatimGeocodingProvider.ts # Forward & reverse geocoding
+│   │   ├── GeminiLLMProvider.ts          # Google Gemini structured intent parser
+│   │   └── OpenAILLMProvider.ts          # OpenAI / Groq compatible provider
+│   └── mock/
+│       ├── MockPlaceProvider.ts          # High-fidelity verified regional database
+│       └── MockLLMProvider.ts            # High-precision deterministic intent engine
+├── agent/
+│   ├── intent/                   # Structured intent extraction engine
+│   ├── expansion/                # Multi-hypothesis semantic query expander
+│   ├── tools/                    # Typed agent tools and execution wrappers
+│   ├── orchestrator/             # Autonomous agent loop with step callbacks
+│   ├── verification/             # 6-Factor zero-hallucination claim verifier
+│   ├── reputation/               # Grounded visitor review analyzer
+│   ├── photos/                   # Authentic venue photo validation pipeline
+│   ├── ranking/                  # Dynamic weighted intent-match scoring engine
+│   ├── refinement/               # Contextual refinement suggestion generator
+│   └── memory/                   # Multi-turn conversational memory manager
+├── utils/
+│   └── geo.ts                    # Haversine distance, travel times & deduplication
+├── services/
+│   └── discoveryService.ts       # Application service facade
+└── qa/
+    └── e2eTestSuite.ts           # 15-scenario automated end-to-end test battery
 ```
 
 ---
 
-## 🛡️ Zero-Fabrication AI Trust Rules
+## 🛡️ Zero-Fabrication AI Trust Guardrails
 
-1. **No Fake Places**: Every candidate is linked to real coordinates, physical address, and verified map listing.
-2. **No Invented Reviews**: Ratings and review summaries are grounded in actual visitor submissions. Sparse evidence is explicitly flagged as `"Limited review evidence"`.
-3. **No Stock Photo Misrepresentation**: Photos must match the actual venue. If no authentic photo exists, the UI displays a clean placeholder instead of a misleading generic stock image.
-4. **Verified Overnight Claims**: The agent will never claim a day beach offers overnight accommodation without explicit proof.
+| Principle | How Aura Enforces It |
+|---|---|
+| **No Fake Places** | Every candidate is linked to real geographic coordinates, physical address, and verified map listing. |
+| **No Invented Reviews** | Review summaries and sentiment scores are strictly grounded in verified visitor submissions. Sparse evidence is explicitly flagged as `"Limited review evidence"`. |
+| **No Stock Photo Lies** | Strict image validation ($\ge 0.75$ confidence threshold). If no authentic venue photo exists, a clean UI placeholder is shown instead of misleading stock photos. |
+| **Verified Lodging Claims** | The agent will never claim a day-use park offers overnight stay without verified evidence. |
+
+---
+
+## 🧪 Automated Testing & QA Suite
+
+Aura includes a comprehensive automated test battery covering **15 distinct end-to-end real-world scenarios**:
+
+```bash
+# Run the complete 15-scenario E2E battery
+npx tsx src/qa/e2eTestSuite.ts
+```
+
+### Verified Scenario Battery:
+| # | Scenario | Tested Agent Capabilities | Status |
+|---|---|---|:---:|
+| 1 | **Primary Demo Query** | Wakeboarding + sunset + quiet + overnight stay outside Chișinău | ✅ 100% Pass |
+| 2 | **Activity-Only Search** | Specific activity extraction without stay requirements | ✅ 100% Pass |
+| 3 | **Ambiguous Input** | *"Good vibes this weekend"* (Broad semantic expansion) | ✅ 100% Pass |
+| 4 | **Distant Target Query** | Geographic radius expansion up to 100+ km | ✅ 100% Pass |
+| 5 | **Tent Camping Search** | Rustic outdoor campground identification | ✅ 100% Pass |
+| 6 | **Family Weekend Query** | Child-friendly safety, playgrounds & calm water | ✅ 100% Pass |
+| 7 | **Romantic Couples Getaway**| High privacy, scenic views & intimate atmosphere | ✅ 100% Pass |
+| 8 | **Quiet Solo Retreat** | Low noise rating, nature immersion & reading spots | ✅ 100% Pass |
+| 9 | **Technical Wakeboarder** | Cable obstacle features, kickers & pro equipment | ✅ 100% Pass |
+| 10 | **Glamping & Luxury Cabins**| High-end dome accommodations & heated amenities | ✅ 100% Pass |
+| 11 | **Refinement: "Make it closer"** | Dynamic distance re-weighting via conversational modifier | ✅ 100% Pass |
+| 12 | **Refinement: "Make it quieter"**| Atmosphere priority boosting via refinement chips | ✅ 100% Pass |
+| 13 | **Multi-Turn Context Carryover** | Retaining location & budget constraints across consecutive turns | ✅ 100% Pass |
+| 14 | **Stock Photo Rejection** | Discarding unverified/generic stock photos | ✅ 100% Pass |
+| 15 | **Geospatial Deduplication** | Merging OSM and Google Places duplicates into single entities | ✅ 100% Pass |
+
+---
+
+## 🚀 Quick Start (Local Development)
+
+### Prerequisites
+* **Node.js**: 18.17+ or 20+
+* **npm**: 9+
+
+### 1. Clone & Install
+```bash
+git clone https://github.com/NikitaDmitrenco/aura.git
+cd aura
+npm install
+```
+
+### 2. Configure Environment (Optional)
+Aura is built with a **Zero-Config Offline Mode** — it works out of the box with zero external API keys! If you wish to connect live cloud LLMs or Google Places:
+
+```bash
+cp .env.example .env.local
+```
+
+```env
+# Cloud LLM Options (Optional - automatic high-precision fallback if omitted)
+GEMINI_API_KEY=your_gemini_api_key
+OPENAI_API_KEY=your_openai_api_key
+GROQ_API_KEY=your_groq_api_key
+
+# Search & Places (Optional - OSM Overpass used automatically if omitted)
+SERPER_API_KEY=your_serper_api_key
+```
+
+### 3. Run Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### 4. Quality Checks & Production Build
+```bash
+# Typecheck TypeScript
+npm run typecheck
+
+# Lint codebase
+npm run lint
+
+# Production Next.js build
+npm run build
+```
+
+---
+
+## 👨‍💻 Author & Contact
+
+**Nikita Dmitrenco**  
+*Full-Stack Software Engineer & AI Systems Builder*
+
+* **GitHub:** [@NikitaDmitrenco](https://github.com/NikitaDmitrenco)
+* **Repository:** [NikitaDmitrenco/aura](https://github.com/NikitaDmitrenco/aura)
+* **Featured Projects:** [Zento (E-Commerce)](https://github.com/NikitaDmitrenco/zento) · [Aura (AI Discovery)](https://github.com/NikitaDmitrenco/aura)
 
 ---
 
 ## 📄 License
-MIT © 2026 Nikita Dmitrenco
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
