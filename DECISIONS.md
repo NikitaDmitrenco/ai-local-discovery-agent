@@ -69,3 +69,13 @@
 - **Context**: Public OpenStreetMap Overpass or Nominatim APIs can experience network latency or rate-limiting.
 - **Decision**: Added `AbortSignal.timeout(1500)` to external fetch calls with seamless fallback to verified databases.
 - **Status**: Implemented & verified.
+
+## DEC-015: Dynamic Client-Side Geospatial Map Rendering with Leaflet
+- **Context**: Users need visual geographical context and driving distances for discovered venues across countryside regions.
+- **Decision**: Implemented `InteractiveMap.tsx` with dynamic client-side Leaflet import (avoiding Next.js SSR issues), dark CartoDB tiles, custom HTML DivIcon pins with match % scores, and rich popup previews.
+- **Status**: Implemented & verified.
+
+## DEC-016: Real-time Server-Sent Events (SSE) Streaming & Trip Planner
+- **Context**: Replacing artificial client timers with true backend agent progress streaming and giving users the ability to save custom weekend itineraries.
+- **Decision**: Enhanced `/api/discover` with ReadableStream SSE support transmitting `step`, `result`, and `done` events. Added `ItineraryModal.tsx` and Web Speech API voice search.
+- **Status**: Implemented & verified.

@@ -33,6 +33,28 @@
   color: var(--text-secondary);
 }
 
+.saveBtn {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.45rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.saveBtn:hover {
+  background: var(--bg-secondary);
+  border-color: var(--border-medium);
+}
+
+.savedActive {
+  background: rgba(52, 211, 153, 0.15);
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
 .matchScoreBadge {
   display: inline-flex;
   align-items: center;

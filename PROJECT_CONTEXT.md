@@ -14,13 +14,15 @@ c:\Users\dmitr\Desktop\AI_Agent\
 │   │       └── discover/
 │   │           └── route.ts          # POST endpoint accepting query, location, sessionId
 │   ├── components/
-│   │   ├── Header.tsx                # App header, location selector, trace launcher
-│   │   ├── HeroSearch.tsx            # Experiential natural language search input
+│   │   ├── Header.tsx                # App header, location selector, trip modal, trace launcher
+│   │   ├── HeroSearch.tsx            # Experiential natural language & voice search input
 │   │   ├── AgentProgress.tsx         # Live multi-step execution visualization
-│   │   ├── PlaceCard.tsx             # Place candidate card with match score & photo
-│   │   ├── PlaceDetailsModal.tsx     # Comprehensive place modal with verification claims
+│   │   ├── PlaceCard.tsx             # Place candidate card with match score, photo & save
+│   │   ├── PlaceDetailsModal.tsx     # Comprehensive place modal with verification claims & save
 │   │   ├── RefinementBar.tsx         # Dynamic AI refinement chips & follow-up input
 │   │   ├── LocationModal.tsx         # Geolocation detector and city picker
+│   │   ├── InteractiveMap.tsx        # Dynamic Leaflet geospatial map with custom pins & popups
+│   │   ├── ItineraryModal.tsx        # Weekend trip schedule planner & clipboard exporter
 │   │   └── AgentTraceModal.tsx       # Detailed execution trace viewer
 │   ├── domain/
 │   │   └── types.ts                  # Typed domain models

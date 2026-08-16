@@ -10,7 +10,8 @@ export class DiscoveryService {
     rawQuery: string,
     locationName = 'Chișinău, Moldova',
     refinementKey?: string,
-    sessionId?: string
+    sessionId?: string,
+    onProgress?: (step: { id: string; status: 'running' | 'completed'; detail?: string; summary?: string }) => void
   ): Promise<DiscoveryResult> {
     const placeProvider = ProviderFactory.getPlaceProvider();
     const llmProvider = ProviderFactory.getLLMProvider();
@@ -22,6 +23,6 @@ export class DiscoveryService {
       geocodingProvider
     );
 
-    return orchestrator.runDiscovery(rawQuery, locationName, refinementKey, sessionId);
+    return orchestrator.runDiscovery(rawQuery, locationName, refinementKey, sessionId, onProgress);
   }
 }

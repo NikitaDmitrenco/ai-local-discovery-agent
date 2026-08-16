@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Compass, MapPin, Activity, Github, Sparkles } from 'lucide-react';
+import { Compass, MapPin, Activity, Github, Sparkles, Bookmark } from 'lucide-react';
 import { LocationModal } from './LocationModal';
 import styles from './Header.module.css';
 
@@ -10,6 +10,8 @@ interface HeaderProps {
   onSelectLocation: (city: string) => void;
   onOpenTrace?: () => void;
   hasActiveSearch?: boolean;
+  savedCount?: number;
+  onOpenItinerary?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -17,6 +19,8 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectLocation,
   onOpenTrace,
   hasActiveSearch,
+  savedCount = 0,
+  onOpenItinerary,
 }) => {
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
 
@@ -42,6 +46,19 @@ export const Header: React.FC<HeaderProps> = ({
             <MapPin size={15} color="#34d399" />
             <span className={styles.locationText}>{currentLocation}</span>
           </button>
+
+          {onOpenItinerary && (
+            <button
+              className={styles.traceButton}
+              onClick={onOpenItinerary}
+              title="Open Saved Trip Itinerary"
+            >
+              <Bookmark size={15} color={savedCount > 0 ? "#34d399" : "#94a3b8"} />
+              <span className={styles.traceText}>
+                My Trip {savedCount > 0 && `(${savedCount})`}
+              </span>
+            </button>
+          )}
 
           {hasActiveSearch && onOpenTrace && (
             <button

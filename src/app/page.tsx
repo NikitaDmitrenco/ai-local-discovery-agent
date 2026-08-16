@@ -8,8 +8,10 @@ import { PlaceCard } from '../components/PlaceCard';
 import { PlaceDetailsModal } from '../components/PlaceDetailsModal';
 import { RefinementBar } from '../components/RefinementBar';
 import { AgentTraceModal } from '../components/AgentTraceModal';
+import { InteractiveMap } from '../components/InteractiveMap';
+import { ItineraryModal } from '../components/ItineraryModal';
 import { PlaceCandidate, AgentExecutionTrace, DiscoveryResult } from '../domain/types';
-import { Sparkles, RotateCcw } from 'lucide-react';
+import { Sparkles, RotateCcw, LayoutGrid, Map as MapIcon, Bookmark } from 'lucide-react';
 import styles from './page.module.css';
 
 const DEFAULT_STEPS: AgentStep[] = [
@@ -37,12 +39,33 @@ export default function HomePage() {
   const [traceData, setTraceData] = useState<AgentExecutionTrace | null>(null);
   const [sessionId, setSessionId] = useState<string>('');
   const [turnCount, setTurnCount] = useState<number>(0);
+  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
+  const [savedPlaces, setSavedPlaces] = useState<PlaceCandidate[]>([]);
+  const [isItineraryOpen, setIsItineraryOpen] = useState(false);
 
-  // Initialize unique session ID
+  // Initialize unique session ID & restore saved places
   useEffect(() => {
     const newSessionId = `session-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     setSessionId(newSessionId);
+
+    try {
+      const saved = localStorage.getItem('local_agent_saved_places');
+      if (saved) {
+        setSavedPlaces(JSON.parse(saved));
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
   }, []);
+
+  // Save to localStorage when savedPlaces changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('local_agent_saved_places', JSON.stringify(savedPlaces));
+    } catch {
+      // Ignore localStorage errors
+    }
+  }, [savedPlaces]);
 
   // Global keyboard shortcuts (Escape to close open modals)
   useEffect(() => {
@@ -50,11 +73,27 @@ export default function HomePage() {
       if (e.key === 'Escape') {
         if (selectedPlace) setSelectedPlace(null);
         if (isTraceOpen) setIsTraceOpen(false);
+        if (isItineraryOpen) setIsItineraryOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedPlace, isTraceOpen]);
+  }, [selectedPlace, isTraceOpen, isItineraryOpen]);
+
+  const handleToggleSave = (place: PlaceCandidate) => {
+    setSavedPlaces((prev) => {
+      const exists = prev.some((p) => p.id === place.id);
+      if (exists) {
+        return prev.filter((p) => p.id !== place.id);
+      } else {
+        return [...prev, place];
+      }
+    });
+  };
+
+  const handleRemoveSavedPlace = (placeId: string) => {
+    setSavedPlaces((prev) => prev.filter((p) => p.id !== placeId));
+  };
 
   const executeDiscovery = async (searchQuery: string, refinementKey?: string) => {
     setIsSearching(true);
@@ -64,70 +103,80 @@ export default function HomePage() {
       setActiveRefinement(null);
     }
 
-    // Step-by-step progress animation
     const newSteps = DEFAULT_STEPS.map((s) => ({ ...s, status: 'pending' as const }));
     setSteps(newSteps);
     setCurrentStepId('intent');
     setStepSummary('Understanding request...');
 
-    // Trigger API call with sessionId for conversational memory
-    const apiPromise = fetch('/api/discover', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: searchQuery,
-        locationName: location,
-        refinementKey,
-        sessionId,
-      }),
-    }).then((res) => res.json() as Promise<DiscoveryResult>);
+    try {
+      // Attempt Server-Sent Events (SSE) streaming request
+      const response = await fetch('/api/discover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: searchQuery,
+          locationName: location,
+          refinementKey,
+          sessionId,
+          stream: true,
+        }),
+      });
 
-    // Animate real step transitions
-    setTimeout(() => {
-      setSteps((prev) =>
-        prev.map((s) =>
-          s.id === 'intent'
-            ? { ...s, status: 'completed', detail: 'Recognized: Sunday evening, water sports, quiet nature, countryside overnight' }
-            : s.id === 'expansion'
-            ? { ...s, status: 'running', detail: 'Expanding to wake park, cable wakeboarding, lake resort, eco glamping' }
-            : s
-        )
-      );
-      setCurrentStepId('expansion');
-      setStepSummary('Hypotheses: wake park, lake resort, glamping');
-    }, 450);
+      if (response.headers.get('content-type')?.includes('text/event-stream') && response.body) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
 
-    setTimeout(() => {
-      setSteps((prev) =>
-        prev.map((s) =>
-          s.id === 'expansion'
-            ? { ...s, status: 'completed' }
-            : s.id === 'discovery'
-            ? { ...s, status: 'running', detail: 'Searching local coordinates and deduplicating entities' }
-            : s
-        )
-      );
-      setCurrentStepId('discovery');
-      setStepSummary('Searching candidate places');
-    }, 950);
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-    setTimeout(() => {
-      setSteps((prev) =>
-        prev.map((s) =>
-          s.id === 'discovery'
-            ? { ...s, status: 'completed' }
-            : s.id === 'verification'
-            ? { ...s, status: 'running', detail: 'Verifying cable wakeboard active, verifying heated wooden cabins available' }
-            : s
-        )
-      );
-      setCurrentStepId('verification');
-      setStepSummary('Verifying claims & overnight access');
-    }, 1500);
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n\n');
+          buffer = lines.pop() || '';
 
-    setTimeout(async () => {
-      try {
-        const data = await apiPromise;
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            const eventMatch = line.match(/^event:\s*(\w+)/m);
+            const dataMatch = line.match(/^data:\s*(.+)$/m);
+
+            if (eventMatch && dataMatch) {
+              const eventType = eventMatch[1];
+              try {
+                const eventData = JSON.parse(dataMatch[1]);
+
+                if (eventType === 'step') {
+                  const { id, status, detail, summary } = eventData;
+                  setCurrentStepId(id);
+                  if (summary) setStepSummary(summary);
+                  setSteps((prev) =>
+                    prev.map((s) =>
+                      s.id === id
+                        ? { ...s, status, detail: detail || s.detail }
+                        : s
+                    )
+                  );
+                } else if (eventType === 'result') {
+                  const resultData = eventData as DiscoveryResult;
+                  setResults(resultData.places || []);
+                  setTraceData(resultData.trace || null);
+                } else if (eventType === 'done') {
+                  setSteps((prev) => prev.map((s) => ({ ...s, status: 'completed' })));
+                  setIsSearching(false);
+                  setHasSearched(true);
+                  setCurrentStepId(undefined);
+                  setStepSummary('Discovery complete');
+                  setTurnCount((prev) => prev + 1);
+                }
+              } catch (parseErr) {
+                console.error('Error parsing SSE event data:', parseErr);
+              }
+            }
+          }
+        }
+      } else {
+        // Fallback to standard JSON response
+        const data: DiscoveryResult = await response.json();
         setSteps((prev) => prev.map((s) => ({ ...s, status: 'completed' })));
         setIsSearching(false);
         setHasSearched(true);
@@ -136,11 +185,11 @@ export default function HomePage() {
         setResults(data.places || []);
         setTraceData(data.trace || null);
         setTurnCount((prev) => prev + 1);
-      } catch (error) {
-        console.error('Failed to discover places:', error);
-        setIsSearching(false);
       }
-    }, 2200);
+    } catch (error) {
+      console.error('Failed to discover places:', error);
+      setIsSearching(false);
+    }
   };
 
   const handleSearch = (searchQuery: string) => {
@@ -176,6 +225,8 @@ export default function HomePage() {
         onSelectLocation={setLocation}
         onOpenTrace={() => setIsTraceOpen(true)}
         hasActiveSearch={hasSearched || isSearching}
+        savedCount={savedPlaces.length}
+        onOpenItinerary={() => setIsItineraryOpen(true)}
       />
 
       <main className={styles.mainContent}>
@@ -215,7 +266,27 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {/* View Mode Toggle (Grid / Map) */}
+                <div className={styles.viewToggleGroup}>
+                  <button
+                    className={`${styles.viewToggleBtn} ${viewMode === 'grid' ? styles.activeViewBtn : ''}`}
+                    onClick={() => setViewMode('grid')}
+                    title="Card Grid View"
+                  >
+                    <LayoutGrid size={14} />
+                    <span>Grid</span>
+                  </button>
+                  <button
+                    className={`${styles.viewToggleBtn} ${viewMode === 'map' ? styles.activeViewBtn : ''}`}
+                    onClick={() => setViewMode('map')}
+                    title="Interactive Map View"
+                  >
+                    <MapIcon size={14} />
+                    <span>Map View</span>
+                  </button>
+                </div>
+
                 {turnCount > 1 && (
                   <button
                     className={styles.traceLinkBtn}
@@ -232,7 +303,7 @@ export default function HomePage() {
                   onClick={() => setIsTraceOpen(true)}
                 >
                   <Sparkles size={14} color="#38bdf8" />
-                  <span>View Agent Discovery Trace</span>
+                  <span>View Agent Trace</span>
                 </button>
               </div>
             </div>
@@ -245,6 +316,16 @@ export default function HomePage() {
               isLoading={isSearching}
             />
 
+            {/* Interactive Map View */}
+            {viewMode === 'map' && (
+              <InteractiveMap
+                places={results}
+                userLocationName={location}
+                selectedPlaceId={selectedPlace?.id}
+                onSelectPlace={setSelectedPlace}
+              />
+            )}
+
             {/* Places Grid */}
             <div className={styles.placesGrid}>
               {results.map((place, idx) => (
@@ -253,6 +334,8 @@ export default function HomePage() {
                   place={place}
                   rankIndex={idx}
                   onSelect={setSelectedPlace}
+                  isSaved={savedPlaces.some((p) => p.id === place.id)}
+                  onToggleSave={handleToggleSave}
                 />
               ))}
             </div>
@@ -265,6 +348,8 @@ export default function HomePage() {
         place={selectedPlace}
         onClose={() => setSelectedPlace(null)}
         userQuery={query}
+        isSaved={selectedPlace ? savedPlaces.some((p) => p.id === selectedPlace.id) : false}
+        onToggleSave={handleToggleSave}
       />
 
       {/* Agent Trace Modal */}
@@ -272,6 +357,16 @@ export default function HomePage() {
         isOpen={isTraceOpen}
         onClose={() => setIsTraceOpen(false)}
         trace={traceData}
+      />
+
+      {/* Custom Trip Itinerary Modal */}
+      <ItineraryModal
+        isOpen={isItineraryOpen}
+        onClose={() => setIsItineraryOpen(false)}
+        savedPlaces={savedPlaces}
+        onRemovePlace={handleRemoveSavedPlace}
+        userLocation={location}
+        onSelectPlace={setSelectedPlace}
       />
     </div>
   );

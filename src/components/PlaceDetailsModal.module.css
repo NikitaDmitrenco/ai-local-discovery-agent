@@ -79,10 +79,17 @@
   font-weight: 600;
   color: var(--text-primary);
   transition: background var(--transition-fast);
+  cursor: pointer;
 }
 
 .navActionBtn:hover {
   background: var(--bg-elevated);
+}
+
+.savedActiveBtn {
+  background: rgba(52, 211, 153, 0.15);
+  border-color: rgba(52, 211, 153, 0.4);
+  color: #34d399;
 }
 
 .closeBtn {

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, ArrowRight, CornerDownLeft, RefreshCw } from 'lucide-react';
+import { Sparkles, ArrowRight, CornerDownLeft, RefreshCw, Mic, MicOff } from 'lucide-react';
 import styles from './HeroSearch.module.css';
 
 interface HeroSearchProps {
@@ -39,6 +39,9 @@ export const HeroSearch: React.FC<HeroSearchProps> = ({
   initialQuery = '',
 }) => {
   const [query, setQuery] = useState(initialQuery);
+  const [isListening, setIsListening] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(false);
+  const recognitionRef = useRef<any>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -46,6 +49,54 @@ export const HeroSearch: React.FC<HeroSearchProps> = ({
       setQuery(initialQuery);
     }
   }, [initialQuery]);
+
+  // Check browser SpeechRecognition support
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition =
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        setVoiceSupported(true);
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'ru-RU';
+
+        recognition.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          if (transcript) {
+            setQuery((prev) => (prev ? `${prev} ${transcript}` : transcript));
+          }
+          setIsListening(false);
+        };
+
+        recognition.onerror = () => {
+          setIsListening(false);
+        };
+
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+
+        recognitionRef.current = recognition;
+      }
+    }
+  }, []);
+
+  const toggleVoiceInput = () => {
+    if (!recognitionRef.current) return;
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (err) {
+        console.error('Speech recognition start failed:', err);
+      }
+    }
+  };
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -84,11 +135,11 @@ export const HeroSearch: React.FC<HeroSearchProps> = ({
       </p>
 
       <form onSubmit={handleSubmit} className={styles.searchForm}>
-        <div className={`${styles.inputBox} ${isLoading ? styles.loadingBorder : ''}`}>
+        <div className={`${styles.inputBox} ${isLoading ? styles.loadingBorder : ''} ${isListening ? styles.listeningBorder : ''}`}>
           <textarea
             ref={textareaRef}
             className={styles.textarea}
-            placeholder="Describe what you want to do. I'll find the right places..."
+            placeholder={isListening ? "Listening to your voice... Speak now..." : "Describe what you want to do. I'll find the right places..."}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -103,23 +154,47 @@ export const HeroSearch: React.FC<HeroSearchProps> = ({
               </span>
             </div>
 
-            <button
-              type="submit"
-              className={styles.submitBtn}
-              disabled={!query.trim() || isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <RefreshCw size={16} className={styles.spin} />
-                  <span>Agent discovering...</span>
-                </>
-              ) : (
-                <>
-                  <span>Find places</span>
-                  <ArrowRight size={16} />
-                </>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              {voiceSupported && (
+                <button
+                  type="button"
+                  onClick={toggleVoiceInput}
+                  className={`${styles.voiceBtn} ${isListening ? styles.voiceActive : ''}`}
+                  title={isListening ? 'Stop listening' : 'Speak your search prompt'}
+                  disabled={isLoading}
+                >
+                  {isListening ? (
+                    <>
+                      <MicOff size={16} color="#fb7185" />
+                      <span className={styles.voiceLabel}>Listening...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Mic size={16} color="#e6a756" />
+                      <span className={styles.voiceLabel}>Voice</span>
+                    </>
+                  )}
+                </button>
               )}
-            </button>
+
+              <button
+                type="submit"
+                className={styles.submitBtn}
+                disabled={!query.trim() || isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <RefreshCw size={16} className={styles.spin} />
+                    <span>Agent discovering...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Find places</span>
+                    <ArrowRight size={16} />
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </form>

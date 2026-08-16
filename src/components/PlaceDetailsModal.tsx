@@ -15,6 +15,8 @@ import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
+  Bookmark,
+  BookmarkCheck,
 } from 'lucide-react';
 import { PlaceCandidate } from '../domain/types';
 import styles from './PlaceDetailsModal.module.css';
@@ -23,12 +25,16 @@ interface PlaceDetailsModalProps {
   place: PlaceCandidate | null;
   onClose: () => void;
   userQuery?: string;
+  isSaved?: boolean;
+  onToggleSave?: (place: PlaceCandidate) => void;
 }
 
 export const PlaceDetailsModal: React.FC<PlaceDetailsModalProps> = ({
   place,
   onClose,
   userQuery,
+  isSaved = false,
+  onToggleSave,
 }) => {
   const [activePhotoIdx, setActivePhotoIdx] = useState(0);
 
@@ -65,6 +71,26 @@ export const PlaceDetailsModal: React.FC<PlaceDetailsModalProps> = ({
           </div>
 
           <div className={styles.topBarRight}>
+            {onToggleSave && (
+              <button
+                className={`${styles.navActionBtn} ${isSaved ? styles.savedActiveBtn : ''}`}
+                onClick={() => onToggleSave(place)}
+                title={isSaved ? 'Remove from trip' : 'Save to trip'}
+              >
+                {isSaved ? (
+                  <>
+                    <BookmarkCheck size={14} color="#34d399" />
+                    <span>Saved in Trip</span>
+                  </>
+                ) : (
+                  <>
+                    <Bookmark size={14} />
+                    <span>Save to Trip</span>
+                  </>
+                )}
+              </button>
+            )}
+
             <button className={styles.navActionBtn} onClick={openNavigation}>
               <Navigation size={14} />
               <span>Directions</span>

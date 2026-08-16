@@ -69,9 +69,50 @@
   animation: pulseBorder 1.5s ease-in-out infinite;
 }
 
+.listeningBorder {
+  border-color: #fb7185;
+  box-shadow: 0 0 15px rgba(251, 113, 133, 0.35);
+  animation: pulseVoice 1.2s ease-in-out infinite;
+}
+
+@keyframes pulseVoice {
+  0%, 100% { border-color: rgba(251, 113, 133, 0.5); }
+  50% { border-color: rgba(251, 113, 133, 1); }
+}
+
 @keyframes pulseBorder {
   0%, 100% { border-color: rgba(230, 167, 86, 0.4); }
   50% { border-color: rgba(230, 167, 86, 0.9); }
+}
+
+.voiceBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  padding: 0.65rem 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.voiceBtn:hover:not(:disabled) {
+  background: var(--bg-elevated);
+  border-color: var(--border-medium);
+}
+
+.voiceActive {
+  background: rgba(251, 113, 133, 0.15);
+  border-color: rgba(251, 113, 133, 0.5);
+  color: #fb7185;
+}
+
+.voiceLabel {
+  font-size: 0.8rem;
 }
 
 .textarea {

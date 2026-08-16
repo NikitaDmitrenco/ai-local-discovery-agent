@@ -1,8 +1,8 @@
 # PROJECT STATUS
 
-Last updated: 2026-08-15 23:54
+Last updated: 2026-08-16 12:10
 
-Current milestone: Milestone 17 — Production Deployment to Vercel (100% DONE)
+Current milestone: Milestone 18 — Interactive Geospatial Map, Real-time SSE Streaming & Trip Itinerary Planner (100% DONE)
 
 Overall completion: 100%
 
@@ -26,14 +26,18 @@ Overall completion: 100%
 | 13 Conversational Memory | DONE | 100% | Multi-turn conversational memory maintaining session history, constraints, and locations with automated tests |
 | 14 Production UX Polish | DONE | 100% | Micro-animations, responsive perfection, a11y keyboard shortcuts, session turn counter & reset context |
 | 15 End-to-End QA | DONE | 100% | 15/15 scenario test battery verification passed with 100% success rate |
-| 16 Final Documentation | DONE | 100% | Comprehensive README.md, ARCHITECTURE.md, DECISIONS.md (DEC-001-014), and PROJECT_CONTEXT.md |
+| 16 Final Documentation | DONE | 100% | Comprehensive README.md, ARCHITECTURE.md, DECISIONS.md (DEC-001-016), and PROJECT_CONTEXT.md |
 | 17 Vercel Deployment | DONE | 100% | vercel.json configuration, repository main branch sync, production build ready |
+| 18 Extended Capabilities | DONE | 100% | Interactive Leaflet Map with custom pins & popups, Real-time SSE Agent Streaming, Voice Search (Web Speech API), Trip Itinerary Planner |
 
 ## Completed
 
-- Completed 100% of all Milestones (M0 through M17).
-- Verified production build, typecheck, lint, and all test suites pass with 0 errors.
-- Pushed clean codebase to GitHub `origin/main`.
+- Completed 100% of all Milestones (M0 through M18).
+- Implemented Interactive OpenStreetMap/Leaflet geospatial map (`InteractiveMap.tsx`) with dark CartoDB tiles and popup previews.
+- Implemented Server-Sent Events (SSE) streaming (`POST /api/discover` with `stream: true`) piping real-time step notifications from server to UI.
+- Implemented Bookmark / Save to Trip system with `ItineraryModal.tsx` displaying interactive weekend timeline, distances, and clipboard export.
+- Implemented Web Speech API natural language voice search in `HeroSearch.tsx`.
+- Verified production build, typecheck, lint, and all 15 E2E test suites pass with 0 errors.
 
 ## Blockers
 
@@ -45,8 +49,8 @@ None.
 
 ## Current Architecture
 
-Next.js 14+ (App Router) + TypeScript + Layered Agent Architecture (UI -> API -> Memory -> Orchestrator -> Verifiers/Reputation/Ranking/Refinement -> Providers).
+Next.js 14+ (App Router) + TypeScript + Layered Agent Architecture (UI -> SSE Stream API -> Memory -> Orchestrator -> Verifiers/Reputation/Ranking/Refinement -> Providers) + Leaflet Geospatial Visualization + Client LocalStorage Itinerary State.
 
 ## Next Action
 
-Ready for user exploration or live cloud deployment.
+Ready for user exploration and production deployment.

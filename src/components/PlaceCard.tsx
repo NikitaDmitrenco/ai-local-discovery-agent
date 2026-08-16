@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Star, MapPin, Bed, CheckCircle, AlertTriangle, ShieldCheck, ArrowUpRight, Compass } from 'lucide-react';
+import { Star, MapPin, Bed, CheckCircle, AlertTriangle, ShieldCheck, ArrowUpRight, Compass, Bookmark, BookmarkCheck } from 'lucide-react';
 import { PlaceCandidate } from '../domain/types';
 import styles from './PlaceCard.module.css';
 
@@ -9,25 +9,50 @@ interface PlaceCardProps {
   place: PlaceCandidate;
   rankIndex: number;
   onSelect: (place: PlaceCandidate) => void;
+  isSaved?: boolean;
+  onToggleSave?: (place: PlaceCandidate) => void;
 }
 
 export const PlaceCard: React.FC<PlaceCardProps> = ({
   place,
   rankIndex,
   onSelect,
+  isSaved = false,
+  onToggleSave,
 }) => {
   const heroPhoto = place.photos[0];
 
   return (
     <article className={styles.card}>
-      {/* Top Banner: Rank & Match Score */}
+      {/* Top Banner: Rank, Match Score & Save Button */}
       <div className={styles.headerBar}>
         <div className={styles.rankBadge}>
           <span>#{rankIndex + 1} Best Match</span>
         </div>
-        <div className={styles.matchScoreBadge}>
-          <span className={styles.matchScoreNumber}>{place.intentMatch.score}%</span>
-          <span className={styles.matchScoreLabel}>intent match</span>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {onToggleSave && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleSave(place);
+              }}
+              className={`${styles.saveBtn} ${isSaved ? styles.savedActive : ''}`}
+              title={isSaved ? 'Remove from trip plan' : 'Save to trip plan'}
+              aria-label="Save to Trip"
+            >
+              {isSaved ? (
+                <BookmarkCheck size={16} color="#34d399" />
+              ) : (
+                <Bookmark size={16} color="#94a3b8" />
+              )}
+            </button>
+          )}
+
+          <div className={styles.matchScoreBadge}>
+            <span className={styles.matchScoreNumber}>{place.intentMatch.score}%</span>
+            <span className={styles.matchScoreLabel}>intent match</span>
+          </div>
         </div>
       </div>
 
