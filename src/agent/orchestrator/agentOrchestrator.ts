@@ -208,6 +208,73 @@ export class DiscoveryAgentOrchestrator {
       const distanceKm = haversineDistanceKm(originCoords, raw.coordinates);
       const travelMins = estimateDriveTimeMinutes(distanceKm);
 
+      const rawAttrs = (raw.rawAttributes || {}) as Record<string, unknown>;
+      const catLower = (raw.category + ' ' + (raw.types?.join(' ') || '')).toLowerCase();
+
+      // Dynamic activities based on venue category & attributes
+      let dynamicActivities: string[] = [];
+      let dynamicAmenities: string[] = ['High-Speed Wi-Fi', 'Terrace', 'Parking'];
+      let dynamicTags: string[] = [];
+      let description = `Verified local venue in ${locationName} offering authentic atmosphere and high-quality hospitality.`;
+
+      if (catLower.includes('steak') || catLower.includes('dining') || catLower.includes('restaurant') || catLower.includes('gourmet') || catLower.includes('banquet') || catLower.includes('celebration')) {
+        dynamicActivities = ['🍽️ Gourmet Dining', '🍷 Wine Pairing', '🌿 Summer Terrace', '🎉 Private Celebrations'];
+        dynamicAmenities = ['Private Event Rooms', 'Summer Terrace', 'Sommelier Wine List', 'Air Conditioning', 'Parking'];
+        dynamicTags = ['Fine Dining', 'Celebrations', 'Steakhouse', 'Wine Selection', 'In City'];
+        description = `${raw.name} is a premier dining destination in Chișinău known for exceptional cuisine, festive atmosphere, and attentive service.`;
+      } else if (catLower.includes('wine_bar') || catLower.includes('enoteca') || catLower.includes('wine')) {
+        dynamicActivities = ['🍷 Wine Tasting', '🧀 Artisan Cheese Pairings', '🕯️ Candlelit Conversations'];
+        dynamicAmenities = ['Sommelier Consultation', 'Wine Cellar', 'Tapas Bar', 'Intimate Seating'];
+        dynamicTags = ['Wine Bar', 'Romantic', 'Enoteca', 'Cozy Atmosphere'];
+        description = `Intimate wine venue with an exquisite curation of local and international vintages, ideal for dates and relaxed conversations.`;
+      } else if (catLower.includes('cocktail') || catLower.includes('speakeasy') || catLower.includes('pub') || catLower.includes('bar') || catLower.includes('nightclub') || catLower.includes('lounge')) {
+        dynamicActivities = ['🍸 Craft Cocktails', '🍺 Craft Beer on Tap', '🎶 DJ Sets & Vinyl Music'];
+        dynamicAmenities = ['Mixology Bar', 'Vinyl Player', 'Summer Veranda', 'Late Night Kitchen'];
+        dynamicTags = ['Craft Cocktails', 'Nightlife', 'Bar & Pub', 'Music Vibe'];
+        description = `Atmospheric evening bar with signature mixology drinks, lively energy, and distinctive music ambiance.`;
+      } else if (catLower.includes('coffee') || catLower.includes('coworking') || catLower.includes('workspace')) {
+        dynamicActivities = ['☕ Specialty Coffee', '💻 Laptop Friendly Workspace', '🥐 Fresh Bakery & Brunch'];
+        dynamicAmenities = ['High-Speed Fiber Wi-Fi', 'Power Sockets at Every Table', 'Quiet Work Corners', 'Air Conditioning'];
+        dynamicTags = ['Specialty Coffee', 'Coworking', 'Work Friendly', 'Fast Wi-Fi'];
+        description = `Productive and welcoming coffee workspace equipped with high-speed internet and artisan coffee.`;
+      } else if (catLower.includes('spa') || catLower.includes('banya') || catLower.includes('sauna') || catLower.includes('wellness') || catLower.includes('thermal')) {
+        dynamicActivities = ['🧖 Wood-Fired Sauna', '🌿 Herbal Steam Bath', '🏊 Thermal Pool & Plunge', '💆 Relaxing Massage'];
+        dynamicAmenities = ['Thermal Pools', 'Hammam', 'Herbal Teas', 'Rest Lounges', 'Private Suites'];
+        dynamicTags = ['Thermal Spa', 'Banya', 'Wellness', 'Deep Relaxation'];
+        description = `Rejuvenating wellness retreat offering thermal steam rituals, massage therapy, and total relaxation.`;
+      } else if (catLower.includes('wake') || catLower.includes('water') || catLower.includes('kayak') || catLower.includes('resort')) {
+        dynamicActivities = ['🌊 Cable Wakeboarding', '🏄 SUP Paddleboarding', '🏊 Lake Swimming', '🧖 Lakeside Sauna'];
+        dynamicAmenities = ['Equipment Rental', 'Instructor Lessons', 'Lakeside Cabins', 'Waterfront Deck'];
+        dynamicTags = ['Water Sports', 'Wakeboarding', 'Lake Nature', 'Active Recreation'];
+        description = `Picturesque lakeside sports complex offering cable wakeboarding, paddleboarding, and scenic outdoor relaxation.`;
+      } else if (catLower.includes('atv') || catLower.includes('quad') || catLower.includes('extreme') || catLower.includes('horse') || catLower.includes('hiking') || catLower.includes('canyon')) {
+        dynamicActivities = ['🏎️ Quad & Buggy Safari', '🐎 Forest Horseback Rides', '🥾 Scenic Hiking Trails'];
+        dynamicAmenities = ['Safety Gear Provided', 'Certified Instructors', 'Scenic Viewpoints', 'Rest Base'];
+        dynamicTags = ['Active Adventure', 'Quad Biking', 'Horse Riding', 'Nature Trails'];
+        description = `Exciting outdoor adventure destination offering off-road tours, trail expeditions, and panoramic views.`;
+      } else if (catLower.includes('family') || catLower.includes('kids') || catLower.includes('zoo') || catLower.includes('park')) {
+        dynamicActivities = ['🎪 Children Play Zones', '🐴 Petting Zoo', '🌳 Scenic Green Walks', '🍕 Family Friendly Dining'];
+        dynamicAmenities = ['Kids Playground', 'Stroller-Friendly Paths', 'Animators', 'Family Rest Areas'];
+        dynamicTags = ['Family Friendly', 'Kids Area', 'Green Park', 'Safe Space'];
+        description = `Family recreation spot featuring secure play areas, green park pathways, and family dining.`;
+      } else {
+        dynamicActivities = ['🌿 Nature Walks', '🍽️ Traditional Dining', '🌅 Sunset Viewpoints'];
+        dynamicAmenities = ['Terrace', 'Wi-Fi', 'Parking'];
+        dynamicTags = ['Nature', 'Relaxation', 'Local Charm', 'Quiet'];
+      }
+
+      if (rawAttrs.noiseLevel === 'low' || rawAttrs.noiseLevel === 'very_quiet' || rawAttrs.noiseLevel === 'secluded_silent' || rawAttrs.noiseLevel === 'quiet') {
+        dynamicTags.push('Quiet');
+      }
+      if (rawAttrs.environment === 'forest' || rawAttrs.environment === 'river_forest' || rawAttrs.environment === 'lake_nature') {
+        dynamicTags.push('Nature', 'Outside City');
+      }
+      if (rawAttrs.hasCabins || rawAttrs.hasSafariDomes || rawAttrs.allowsNightStay) {
+        dynamicTags.push('Overnight Stay');
+      }
+
+      const hasNightStay = Boolean(rawAttrs.allowsNightStay || rawAttrs.hasCabins || rawAttrs.hasSafariDomes || rawAttrs.hasVillas || rawAttrs.hasBoutiqueHotel || rawAttrs.hasChalets || rawAttrs.hasCottages);
+
       verifiedCandidates.push({
         id: raw.id,
         name: raw.name,
@@ -216,14 +283,14 @@ export class DiscoveryAgentOrchestrator {
         coordinates: raw.coordinates,
         distanceKm,
         travelTimeMinutes: travelMins,
-        description: `Discovered countryside destination offering water activities, quiet evening atmosphere, and overnight stay options.`,
-        activities: ['🌊 Cable Wakeboarding', '🏄 SUP Boarding', '🏊 Lake Swimming', '🧖 Sauna'],
-        amenities: ['Lakeside Cottages', 'Equipment Rental', 'Terrace', 'Wi-Fi', 'Parking'],
-        openingHours: raw.openingHours?.[0] || 'Sun: 09:00 - 22:00 (Water sports until sunset)',
+        description,
+        activities: dynamicActivities,
+        amenities: dynamicAmenities,
+        openingHours: raw.openingHours?.[0] || 'Sun: 09:00 - 22:00',
         accommodation: {
-          available: true,
-          type: 'Wooden Lakeside Cabins & Villas',
-          details: 'Comfortable heated cabins with private water access and breakfast.',
+          available: hasNightStay,
+          type: hasNightStay ? 'Wooden Cabins / Glamping Domes / Hotel Suites' : 'Day-use venue',
+          details: hasNightStay ? 'Comfortable stay options with verified amenities.' : 'Operational for day & evening visits.',
           verified: true,
           source: 'Official Venue Verification',
         },
@@ -242,7 +309,7 @@ export class DiscoveryAgentOrchestrator {
             reputationScore: 0.9,
           },
         },
-        tags: ['Water Sports', 'Overnight Stay', 'Quiet', 'Nature', 'Outside City'],
+        tags: dynamicTags,
       });
     }
 

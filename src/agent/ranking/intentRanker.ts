@@ -28,15 +28,25 @@ export class IntentRanker {
 
     const scoredCandidates = candidates.map((candidate) => {
       // 1. Activity Match Factor
-      const actPool = candidate.activities.join(' ').toLowerCase();
+      const actPool = (candidate.activities.join(' ') + ' ' + candidate.category + ' ' + candidate.tags.join(' ')).toLowerCase();
       let activityScore = 0.5;
-      if (
-        intent.activities.some(
-          (a) =>
-            actPool.includes(a.toLowerCase()) ||
-            (a.includes('wake') && (actPool.includes('wake') || actPool.includes('вейк'))) ||
-            (a.includes('water') && (actPool.includes('water') || actPool.includes('вод')))
-        )
+
+      const isWaterRequested = intent.activities.some((a) => a.includes('water') || a.includes('wake') || a.includes('swim'));
+      const isDiningRequested = intent.activities.some((a) => a.includes('dining') || a.includes('celebration') || a.includes('wine'));
+      const isSpaRequested = intent.activities.some((a) => a.includes('spa') || a.includes('banya') || a.includes('sauna'));
+
+      const hasWater = actPool.includes('wake') || actPool.includes('water') || actPool.includes('вейк') || actPool.includes('вод') || actPool.includes('sup');
+      const hasDining = actPool.includes('dining') || actPool.includes('restaurant') || actPool.includes('steak') || actPool.includes('gourmet') || actPool.includes('wine');
+      const hasSpa = actPool.includes('spa') || actPool.includes('banya') || actPool.includes('sauna') || actPool.includes('thermal');
+
+      if (isWaterRequested) {
+        activityScore = hasWater ? 0.99 : 0.35;
+      } else if (isDiningRequested) {
+        activityScore = hasDining ? 0.99 : 0.35;
+      } else if (isSpaRequested) {
+        activityScore = hasSpa ? 0.99 : 0.35;
+      } else if (
+        intent.activities.some((a) => actPool.includes(a.toLowerCase()))
       ) {
         activityScore = 0.98;
       }
@@ -80,9 +90,15 @@ export class IntentRanker {
 
       // Generate Contextual "Why AI picked this" explanation
       const matchReasons: string[] = [];
-      if (activityScore > 0.8) matchReasons.push('verified water & sports activities');
-      if (atmosphereScore > 0.8) matchReasons.push('quiet natural countryside setting');
-      if (accommodationScore > 0.8 && intent.accommodation.required) matchReasons.push('cozy lakeside overnight cabins');
+      if (candidate.tags.length > 0) {
+        matchReasons.push(candidate.tags.slice(0, 2).join(' & '));
+      } else if (activityScore > 0.8) {
+        matchReasons.push('verified experiential activities');
+      }
+      if (candidate.activities.length > 0) {
+        matchReasons.push(candidate.activities[0].replace(/^[^\w\sа-яА-ЯёЁ]+/, '').trim());
+      }
+      if (accommodationScore > 0.8 && intent.accommodation.required) matchReasons.push('verified overnight stay');
       if (distanceScore > 0.75) matchReasons.push(`accessible drive (${candidate.travelTimeMinutes} min from city)`);
 
       const explanation = `Top fit for your experience: combines ${matchReasons.slice(0, 3).join(', ')} perfectly aligned with your request.`;

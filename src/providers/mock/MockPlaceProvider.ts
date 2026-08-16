@@ -1,112 +1,74 @@
 import { PlaceSearchProvider, RawPlaceItem, RawReviewItem } from '../types';
 import { Coordinates } from '../../domain/types';
+import { PLACES_REGISTRY } from '../../data/placesRegistry';
+import { haversineDistanceKm } from '../../utils/geo';
 
 export class MockPlaceProvider implements PlaceSearchProvider {
   name = 'MockPlaceSearchEngine';
 
-  private mockDatabase: RawPlaceItem[] = [
-    {
-      id: 'mock-ghidighici-wakepark',
-      name: 'WakePark Ghidighici & Lakeside Cabins',
-      category: 'Wake Park & Countryside Resort',
-      address: 'Ghidighici Reservoir Shore, Vatra, Moldova',
-      coordinates: { lat: 47.0792, lng: 28.7294 },
-      rating: 4.8,
-      userRatingsTotal: 342,
-      openingHours: ['Sunday: 09:00 – 22:00', 'Monday: Closed', 'Tue-Sat: 10:00 – 21:00'],
-      types: ['sports_complex', 'lodging', 'park', 'campground'],
-      photoUrls: [
-        'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
-      ],
-      website: 'https://wakepark-moldova.example.com',
-      phoneNumber: '+373 69 123 456',
-      rawAttributes: {
-        hasCableWakeboard: true,
-        hasCabins: true,
-        cabinCount: 8,
-        allowsNightStay: true,
-        noiseLevel: 'low',
-        environment: 'lake_nature',
-      },
-    },
-    {
-      id: 'mock-costesti-resort',
-      name: 'Costești Lakeside Complex & Eco Villas',
-      category: 'Lake Resort & Water Recreation',
-      address: 'Costești Lake Shore, Ialoveni District, Moldova',
-      coordinates: { lat: 46.8672, lng: 28.7758 },
-      rating: 4.6,
-      userRatingsTotal: 489,
-      openingHours: ['Sunday: 08:00 – 23:00', 'Mon-Sat: 08:00 – 23:00'],
-      types: ['resort_hotel', 'restaurant', 'water_sports'],
-      photoUrls: [
-        'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=1200&q=80',
-      ],
-      website: 'https://costesti-resort.example.com',
-      phoneNumber: '+373 22 888 999',
-      rawAttributes: {
-        hasBoatTowing: true,
-        hasJetSki: true,
-        hasVillas: true,
-        allowsNightStay: true,
-        noiseLevel: 'medium_afternoon_quiet_evening',
-        environment: 'lake_resort',
-      },
-    },
-    {
-      id: 'mock-nistru-glamping',
-      name: 'Nistru River Glamping & Kayak Haven',
-      category: 'Eco Glamping & River Adventures',
-      address: 'Vadul lui Vodă - Molovata Riverbank, Moldova',
-      coordinates: { lat: 47.1952, lng: 29.0831 },
-      rating: 4.9,
-      userRatingsTotal: 178,
-      openingHours: ['Sunday: 08:00 – 22:00', 'Mon-Sat: 08:00 – 22:00'],
-      types: ['campground', 'lodging', 'adventure_sports'],
-      photoUrls: [
-        'https://images.unsplash.com/photo-1526772662000-3f88f10405ff?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
-      ],
-      website: 'https://nistru-glamping.example.com',
-      phoneNumber: '+373 78 555 123',
-      rawAttributes: {
-        hasKayaks: true,
-        hasPaddleboards: true,
-        hasSafariDomes: true,
-        allowsNightStay: true,
-        noiseLevel: 'ultra_quiet',
-        environment: 'river_nature',
-      },
-    },
-    {
-      id: 'mock-suruceni-lodge',
-      name: 'Suruceni Aqua Lodge & Lake House',
-      category: 'Lake Lodge & Family Relaxation',
-      address: 'Suruceni Lake, Ialoveni, Moldova',
-      coordinates: { lat: 46.9785, lng: 28.6678 },
-      rating: 4.5,
-      userRatingsTotal: 215,
-      openingHours: ['Sunday: 08:00 – 22:00', 'Mon-Sat: 08:00 – 22:00'],
-      types: ['lodging', 'park'],
-      photoUrls: [
-        'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1200&q=80',
-      ],
-      website: 'https://suruceni-lodge.example.com',
-      phoneNumber: '+373 22 444 333',
-      rawAttributes: {
-        hasCatamarans: true,
-        hasChalets: true,
-        allowsNightStay: true,
-        noiseLevel: 'quiet',
-        environment: 'small_lake',
-      },
-    },
-  ];
+  private mockDatabase: RawPlaceItem[] = PLACES_REGISTRY;
 
   private mockReviews: Record<string, RawReviewItem[]> = {
+    'rest-fuior-gourmet': [
+      {
+        authorName: 'Alexandru M.',
+        rating: 5,
+        text: 'Прекрасный ресторан для празднования дня рождения! Отличная современная молдавская кухня, великолепная подача и сервис на высшем уровне.',
+        relativeTimeDescription: '2 недели назад',
+      },
+      {
+        authorName: 'Elena V.',
+        rating: 5,
+        text: 'Отмечали юбилей в отдельном зале — всё прошло безупречно. Очень уютно, богатое винное меню.',
+        relativeTimeDescription: 'месяц назад',
+      },
+    ],
+    'rest-pegas-terrace': [
+      {
+        authorName: 'Dmitri K.',
+        rating: 5,
+        text: 'Лучшие стейки в Кишиневе! Идеальное место для дня рождения компанией. Терраса летом просто сказка.',
+        relativeTimeDescription: 'неделю назад',
+      },
+      {
+        authorName: 'Natalia S.',
+        rating: 5,
+        text: 'Отличный ресторан для семейного праздника. Вкуснейшее мясо, детская зона и приветливый персонал.',
+        relativeTimeDescription: '3 недели назад',
+      },
+    ],
+    'rest-gastrobar-chisinau': [
+      {
+        authorName: 'Mihai T.',
+        rating: 5,
+        text: 'Атмосфера топ! Открытая кухня, потрясающие авторские блюда и классные коктейли. Праздновали ДР с друзьями на ура.',
+        relativeTimeDescription: 'месяц назад',
+      },
+    ],
+    'rest-kiku-steak-wine': [
+      {
+        authorName: 'Victor R.',
+        rating: 5,
+        text: 'Солидный ресторан для важного события. Мясо тает во рту, сомелье подобрал идеальное вино.',
+        relativeTimeDescription: '2 месяца назад',
+      },
+    ],
+    'rest-zaxi-rooftop': [
+      {
+        authorName: 'Olga P.',
+        rating: 5,
+        text: 'Панорамный вид на весь ночной Кишинев с крыши. Диджей, вкусные коктейли и азиатская кухня. Лучшее место для веселого ДР!',
+        relativeTimeDescription: 'неделю назад',
+      },
+    ],
+    'wine-carpe-diem': [
+      {
+        authorName: 'Sergiu B.',
+        rating: 5,
+        text: 'Идеальное романтическое место для свидания. Уютная камерная атмосфера, огромный выбор редких молдавских вин.',
+        relativeTimeDescription: '3 недели назад',
+      },
+    ],
     'mock-ghidighici-wakepark': [
       {
         authorName: 'Alexandru M.',
@@ -120,12 +82,6 @@ export class MockPlaceProvider implements PlaceSearchProvider {
         text: 'Super peaceful on Sunday evenings. Very quiet outside the city. The cabins are warm and have clean showers.',
         relativeTimeDescription: 'a month ago',
       },
-      {
-        authorName: 'Dumitru C.',
-        rating: 4,
-        text: 'Great spot for water sports. Road is slightly rough the last 500 meters, but totally worth it.',
-        relativeTimeDescription: '3 months ago',
-      },
     ],
     'mock-costesti-resort': [
       {
@@ -133,12 +89,6 @@ export class MockPlaceProvider implements PlaceSearchProvider {
         rating: 5,
         text: 'Lovely lake resort. Rented SUP boards and had a great dinner overlooking the water. Clean villas for overnight stay.',
         relativeTimeDescription: '1 month ago',
-      },
-      {
-        authorName: 'Maria T.',
-        rating: 4,
-        text: 'Pool area was lively in the afternoon, but by 7 PM everything turned into a quiet, relaxing nature oasis.',
-        relativeTimeDescription: '2 months ago',
       },
     ],
     'mock-nistru-glamping': [
@@ -148,19 +98,37 @@ export class MockPlaceProvider implements PlaceSearchProvider {
         text: 'Magical glamping right by the river. Complete silence, starry sky, and great morning kayaking along the canyon.',
         relativeTimeDescription: '3 weeks ago',
       },
+    ],
+    'spa-aquaterra-oasis': [
       {
-        authorName: 'Vera K.',
+        authorName: 'Irina L.',
         rating: 5,
-        text: 'The safari tents are luxurious with cozy beds and heated stoves. Ideal romantic getaway.',
-        relativeTimeDescription: 'a month ago',
+        text: 'Роскошный термальный комплекс. Хаммам, бассейны и массаж на высшем уровне для полного расслабления.',
+        relativeTimeDescription: '2 недели назад',
       },
     ],
-    'mock-suruceni-lodge': [
+    'work-tucano-costa-rica': [
       {
-        authorName: 'Vitalie G.',
+        authorName: 'Pavel D.',
         rating: 5,
-        text: 'Very close to Chisinau, only 15 minutes. Great peaceful lake, cozy wooden chalet for overnight sleep.',
-        relativeTimeDescription: '2 months ago',
+        text: 'Отличный кофе, быстрый интернет и много розеток. Удобно поработать несколько часов с ноутбуком.',
+        relativeTimeDescription: 'вчера',
+      },
+    ],
+    'bar-513-speakeasy': [
+      {
+        authorName: 'Andrei C.',
+        rating: 5,
+        text: 'Секретный спикизи бар с винилом и невероятными авторскими коктейлями. Без суеты и толпы.',
+        relativeTimeDescription: '4 дня назад',
+      },
+    ],
+    'act-enduro-quad-moldova': [
+      {
+        authorName: 'Dan S.',
+        rating: 5,
+        text: 'Море адреналина! Маршруты по лесам и холмам просто супер. Инструкторы классные.',
+        relativeTimeDescription: 'неделю назад',
       },
     ],
   };
@@ -170,8 +138,63 @@ export class MockPlaceProvider implements PlaceSearchProvider {
     location: Coordinates,
     radiusKm: number
   ): Promise<RawPlaceItem[]> {
-    // Return all candidate places matching any of the semantic categories
-    return this.mockDatabase;
+    if (!queries || queries.length === 0) {
+      return this.mockDatabase.slice(0, 8);
+    }
+
+    const queryTokens = queries
+      .join(' ')
+      .toLowerCase()
+      .split(/[\s,–—-]+/)
+      .filter((t) => t.length > 2);
+
+    // Score and filter candidates based on query tokens and location radius
+    const scored = this.mockDatabase.map((place) => {
+      const dist = haversineDistanceKm(location, place.coordinates);
+      let score = 0;
+
+      const placeText = (
+        place.name +
+        ' ' +
+        place.category +
+        ' ' +
+        (place.types?.join(' ') || '') +
+        ' ' +
+        JSON.stringify(place.rawAttributes || {})
+      ).toLowerCase();
+
+      for (const token of queryTokens) {
+        if (token.length < 3) continue;
+        if (placeText.includes(token)) {
+          if (token.includes('wake') || token.includes('вейк') || token.includes('water') || token.includes('вод') || token.includes('restaur') || token.includes('рестор') || token.includes('cocktail') || token.includes('коктейл') || token.includes('banya') || token.includes('бан') || token.includes('spa') || token.includes('спа') || token.includes('quad') || token.includes('квадр') || token.includes('cowork') || token.includes('коворк')) {
+            score += 40;
+          } else {
+            score += 15;
+          }
+        }
+      }
+
+      // Bonus for higher rating
+      if (place.rating) {
+        score += place.rating * 2;
+      }
+
+      // Proximity bonus if within target radius
+      if (dist <= radiusKm) {
+        score += 15;
+      }
+
+      return { place, score, dist };
+    });
+
+    // Filter within reasonable radius (radiusKm * 1.6) unless too few candidates
+    const radiusFiltered = scored.filter((s) => s.dist <= (radiusKm || 50) * 1.6);
+    const candidatePool = radiusFiltered.length >= 4 ? radiusFiltered : scored;
+
+    // Sort by match score descending, then by distance
+    candidatePool.sort((a, b) => b.score - a.score || a.dist - b.dist);
+
+    return candidatePool.slice(0, 8).map((s) => s.place);
   }
 
   async getPlaceDetails(placeId: string): Promise<RawPlaceItem | null> {
@@ -179,7 +202,16 @@ export class MockPlaceProvider implements PlaceSearchProvider {
   }
 
   async getReviews(placeId: string): Promise<RawReviewItem[]> {
-    return this.mockReviews[placeId] || [];
+    return (
+      this.mockReviews[placeId] || [
+        {
+          authorName: 'Verified Visitor',
+          rating: 5,
+          text: 'Great verified place with excellent atmosphere, verified amenities, and welcoming staff.',
+          relativeTimeDescription: 'recently',
+        },
+      ]
+    );
   }
 
   async getPhotos(placeId: string): Promise<string[]> {
