@@ -122,10 +122,7 @@ export const PlaceDetailsModal: React.FC<PlaceDetailsModalProps> = ({
                   </>
                 )}
                 <div className={styles.photoCaptionBar}>
-                  <div className={styles.photoVerifyStatus}>
-                    <ShieldCheck size={14} color="#34d399" />
-                    <span>Verified Place Photo ({currentPhoto.source})</span>
-                  </div>
+                  <span className={styles.photoCaptionText}>{currentPhoto.caption || place.name}</span>
                   <span className={styles.photoCounter}>
                     {activePhotoIdx + 1} / {place.photos.length}
                   </span>

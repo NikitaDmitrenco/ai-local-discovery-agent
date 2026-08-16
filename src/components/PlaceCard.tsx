@@ -66,12 +66,6 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({
               className={styles.image}
               loading="lazy"
             />
-            {heroPhoto.verified && (
-              <div className={styles.photoVerifiedBadge}>
-                <ShieldCheck size={13} color="#34d399" />
-                <span>Verified Place Photo</span>
-              </div>
-            )}
           </div>
         ) : (
           <div className={styles.placeholderMedia}>

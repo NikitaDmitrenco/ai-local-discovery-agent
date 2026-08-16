@@ -20,7 +20,6 @@ const DEFAULT_STEPS: AgentStep[] = [
   { id: 'discovery', label: 'Searching local places and deduplicating venue candidates', status: 'pending' },
   { id: 'verification', label: 'Verifying water activities & overnight cabin accommodations', status: 'pending' },
   { id: 'reviews', label: 'Synthesizing verified visitor reviews and reputation', status: 'pending' },
-  { id: 'photos', label: 'Verifying authentic place photos and rejecting generic stock', status: 'pending' },
   { id: 'ranking', label: 'Computing dynamic intent match score and rationale', status: 'pending' },
 ];
 

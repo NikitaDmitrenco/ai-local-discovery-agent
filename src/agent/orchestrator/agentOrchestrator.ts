@@ -258,12 +258,6 @@ export class DiscoveryAgentOrchestrator {
       detail: `Analyzed visitor reviews, positive highlights & caveats across all candidates`,
     });
 
-    onProgress?.({
-      id: 'photos',
-      status: 'completed',
-      detail: `Verified authentic venue photos with confidence threshold >= 0.75`,
-    });
-
     // Add explicit mock disqualifications to trace if needed
     if (rejections.length === 0) {
       rejections.push(
