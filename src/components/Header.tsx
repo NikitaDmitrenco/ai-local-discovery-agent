@@ -32,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
             <Compass size={22} color="#e6a756" />
           </div>
           <div className={styles.brandText}>
-            <span className={styles.brandName}>Local Agent</span>
+            <span className={styles.brandName}>Aura</span>
             <span className={styles.brandBadge}>AI DISCOVERY</span>
           </div>
         </div>

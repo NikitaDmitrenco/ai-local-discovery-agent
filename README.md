@@ -1,4 +1,4 @@
-# AI Local Discovery Agent
+# Aura — AI Local Discovery Agent
 
 > High-quality, AI-native consumer web application for natural-language local experience discovery.
 
@@ -9,11 +9,11 @@
 
 ---
 
-## 🌟 What is AI Local Discovery Agent?
+## 🌟 What is Aura?
 
 Finding the right local venue traditionally requires knowing business categories, exact keywords, opening hours, and cross-referencing multiple platforms for reviews, activities, and overnight accommodation.
 
-**AI Local Discovery Agent** allows users to describe what they want in natural human language:
+**Aura** allows users to describe what they want in natural human language:
 
 > *"Хочу вечерком воскресным отдохнуть в каком-нибудь тихом местечке где можно покататься на воде и поспать за городом"*
 
