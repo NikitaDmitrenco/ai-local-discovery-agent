@@ -10,6 +10,34 @@ interface HeroSearchProps {
   initialQuery?: string;
 }
 
+const MOOD_PILLS = [
+  {
+    icon: '🌅',
+    label: 'Тихий закат у воды',
+    query: 'Тихое уединенное место у воды за городом с красивым закатом и ночёвкой',
+  },
+  {
+    icon: '🏄‍♂️',
+    label: 'Вейкборд & Спорт',
+    query: 'Где можно активно покататься на вейкборде или сапах с друзьями на озере?',
+  },
+  {
+    icon: '🏕️',
+    label: 'Глэмпинг & Домики',
+    query: 'Уютный глэмпинг или теплые домики у озера с ночевкой на природе',
+  },
+  {
+    icon: '👨‍👩‍👧',
+    label: 'С семьей и детьми',
+    query: 'Спокойное безопасное место для отдыха с семьей и детьми на природе',
+  },
+  {
+    icon: '🥂',
+    label: 'Романтика для двоих',
+    query: 'Уютное уединённое место на берегу реки для двоих с красивым закатом',
+  },
+];
+
 const PRESET_QUERIES = [
   {
     label: 'Primary Demo (Water + Overnight + Quiet)',
@@ -199,8 +227,31 @@ export const HeroSearch: React.FC<HeroSearchProps> = ({
         </div>
       </form>
 
+      {/* Quick Vibe & Mood Selector */}
+      <div className={styles.moodsWrapper}>
+        <span className={styles.presetsTitle}>Quick Vibe & Mood Selector:</span>
+        <div className={styles.moodsList}>
+          {MOOD_PILLS.map((pill, idx) => (
+            <button
+              key={idx}
+              type="button"
+              className={styles.moodPill}
+              onClick={() => {
+                setQuery(pill.query);
+                onSearch(pill.query);
+              }}
+              disabled={isLoading}
+              title={pill.query}
+            >
+              <span className={styles.moodIcon}>{pill.icon}</span>
+              <span className={styles.moodLabel}>{pill.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className={styles.presetsWrapper}>
-        <span className={styles.presetsTitle}>Try natural language prompts:</span>
+        <span className={styles.presetsTitle}>Or explore full prompt scenarios:</span>
         <div className={styles.presetsList}>
           {PRESET_QUERIES.map((preset, index) => (
             <button

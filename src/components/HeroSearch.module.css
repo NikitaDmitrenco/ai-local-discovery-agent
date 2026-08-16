@@ -193,6 +193,60 @@
   100% { transform: rotate(360deg); }
 }
 
+.moodsWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+}
+
+.moodsList {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  max-width: 820px;
+}
+
+.moodPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 0.45rem 0.95rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.moodPill:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+  border-color: var(--accent-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(230, 167, 86, 0.12);
+}
+
+.moodPill:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.moodIcon {
+  font-size: 1rem;
+}
+
+.moodLabel {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
 .presetsWrapper {
   width: 100%;
   display: flex;
