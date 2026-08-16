@@ -29,7 +29,7 @@ export class OpenAILLMProvider implements LLMProvider {
           messages: [
             {
               role: 'system',
-              content: options?.systemPrompt || 'You are an AI local discovery assistant.',
+              content: options?.systemPrompt || 'You are Aura, an AI local discovery assistant.',
             },
             { role: 'user', content: prompt },
           ],
@@ -67,7 +67,7 @@ export class OpenAILLMProvider implements LLMProvider {
           messages: [
             {
               role: 'system',
-              content: `You are an expert AI Local Discovery intent extraction engine. Respond strictly with a JSON object matching this description: ${schemaDescription}. No surrounding markdown.`,
+              content: `You are an expert Aura intent extraction engine. Respond strictly with a JSON object matching this description: ${schemaDescription}. No surrounding markdown.`,
             },
             { role: 'user', content: prompt },
           ],

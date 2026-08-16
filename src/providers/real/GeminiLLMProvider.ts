@@ -52,7 +52,7 @@ export class GeminiLLMProvider implements LLMProvider {
           systemInstruction: {
             parts: [
               {
-                text: `You are an expert AI Local Discovery parser. Respond ONLY with a valid JSON object matching this schema description: ${schemaDescription}. Do not include markdown fences or any other commentary.`,
+                text: `You are an expert Aura intent extraction parser. Respond ONLY with a valid JSON object matching this schema description: ${schemaDescription}. Do not include markdown fences or any other commentary.`,
               },
             ],
           },

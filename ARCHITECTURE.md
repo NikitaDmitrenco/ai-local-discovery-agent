@@ -2,7 +2,7 @@
 
 ## 1. Architectural Overview
 
-AI Local Discovery Agent is constructed as a modern Next.js 14 (App Router) full-stack application with strict layered separation between presentation, orchestration, domain verification, and external provider adapters.
+Aura is constructed as a modern Next.js 14 (App Router) full-stack application with strict layered separation between presentation, orchestration, domain verification, and external provider adapters.
 
 ```text
 [ Presentation Layer: Next.js Client Components (Vanilla CSS Tokens) ]

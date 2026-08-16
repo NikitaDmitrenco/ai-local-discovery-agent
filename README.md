@@ -4,8 +4,8 @@
 
 [![Next.js 14](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/E2E_Tests-15%2F15_Passing-success)](https://github.com/NikitaDmitrenco/ai-local-discovery-agent)
-[![Zero Fabrication](https://img.shields.io/badge/AI_Trust-Zero_Hallucination-emerald)](https://github.com/NikitaDmitrenco/ai-local-discovery-agent)
+[![Tests](https://img.shields.io/badge/E2E_Tests-15%2F15_Passing-success)](https://github.com/NikitaDmitrenco/aura)
+[![Zero Fabrication](https://img.shields.io/badge/AI_Trust-Zero_Hallucination-emerald)](https://github.com/NikitaDmitrenco/aura)
 
 ---
 
@@ -37,8 +37,8 @@ The agent autonomously:
 
 ### Installation
 ```bash
-git clone https://github.com/NikitaDmitrenco/ai-local-discovery-agent.git
-cd ai-local-discovery-agent
+git clone https://github.com/NikitaDmitrenco/aura.git
+cd aura
 npm install
 ```
 

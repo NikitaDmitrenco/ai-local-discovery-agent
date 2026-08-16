@@ -1,4 +1,4 @@
-# Project Context & Developer Reference
+# Aura — Project Context & Developer Reference
 
 ## 1. Quick Repository Map
 

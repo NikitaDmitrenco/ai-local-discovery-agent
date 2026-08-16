@@ -14,7 +14,7 @@ interface ScenarioResult {
 
 async function runE2EBattery() {
   console.log('====================================================');
-  console.log('  AI LOCAL DISCOVERY AGENT — 15-SCENARIO E2E BATTERY');
+  console.log('  AURA (AI LOCAL DISCOVERY) — 15-SCENARIO E2E BATTERY');
   console.log('====================================================\n');
 
   const results: ScenarioResult[] = [];

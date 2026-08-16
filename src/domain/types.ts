@@ -1,5 +1,5 @@
 /**
- * Core Domain Models for AI Local Discovery Agent
+ * Core Domain Models for Aura (AI Local Discovery Agent)
  * Encapsulates normalized business entities, intent representations,
  * verification claims, and reputation summaries.
  */

@@ -72,7 +72,7 @@ export const Header: React.FC<HeaderProps> = ({
           )}
 
           <a
-            href="https://github.com/NikitaDmitrenco/ai-local-discovery-agent"
+            href="https://github.com/NikitaDmitrenco/aura"
             target="_blank"
             rel="noopener noreferrer"
             className={styles.githubLink}
