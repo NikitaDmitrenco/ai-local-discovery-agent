@@ -2,18 +2,18 @@ import { PlaceSearchProvider, RawPlaceItem, RawReviewItem } from '../types';
 import { Coordinates } from '../../domain/types';
 import { OverpassPlaceProvider } from './OverpassPlaceProvider';
 import { SerperPlaceProvider } from './SerperPlaceProvider';
-import { MockPlaceProvider } from '../mock/MockPlaceProvider';
+import { SupabasePlaceProvider } from './SupabasePlaceProvider';
 import { arePlacesDuplicates } from '../../utils/geo';
 
 export class AggregatedPlaceProvider implements PlaceSearchProvider {
   name = 'MultiSourceAggregatedPlaceProvider';
   private overpassProvider: OverpassPlaceProvider;
   private serperProvider?: SerperPlaceProvider;
-  private mockProvider: MockPlaceProvider;
+  private supabaseProvider: SupabasePlaceProvider;
 
   constructor() {
     this.overpassProvider = new OverpassPlaceProvider();
-    this.mockProvider = new MockPlaceProvider();
+    this.supabaseProvider = new SupabasePlaceProvider();
     const serperKey = process.env.SERPER_API_KEY;
     if (serperKey) {
       this.serperProvider = new SerperPlaceProvider(serperKey);
@@ -54,14 +54,14 @@ export class AggregatedPlaceProvider implements PlaceSearchProvider {
       console.warn('Aggregated search error, falling back:', e);
     }
 
-    // 2. Always supplement/fallback with high-fidelity verified places
-    const mockPlaces = await this.mockProvider.searchPlaces(queries, location, radiusKm);
-    for (const mockItem of mockPlaces) {
+    // 2. Supplement and rank with verified Supabase Cloud Database places
+    const supabasePlaces = await this.supabaseProvider.searchPlaces(queries, location, radiusKm);
+    for (const placeItem of supabasePlaces) {
       const isDup = combined.some((existing) =>
-        arePlacesDuplicates(existing.name, existing.coordinates, mockItem.name, mockItem.coordinates)
+        arePlacesDuplicates(existing.name, existing.coordinates, placeItem.name, placeItem.coordinates)
       );
       if (!isDup) {
-        combined.push(mockItem);
+        combined.push(placeItem);
       }
     }
 
@@ -69,14 +69,14 @@ export class AggregatedPlaceProvider implements PlaceSearchProvider {
   }
 
   async getPlaceDetails(placeId: string): Promise<RawPlaceItem | null> {
-    return this.mockProvider.getPlaceDetails(placeId);
+    return this.supabaseProvider.getPlaceDetails(placeId);
   }
 
   async getReviews(placeId: string): Promise<RawReviewItem[]> {
-    return this.mockProvider.getReviews(placeId);
+    return this.supabaseProvider.getReviews(placeId);
   }
 
   async getPhotos(placeId: string): Promise<string[]> {
-    return this.mockProvider.getPhotos(placeId);
+    return this.supabaseProvider.getPhotos(placeId);
   }
 }

@@ -1,6 +1,6 @@
 import { PlaceSearchProvider, RawPlaceItem, RawReviewItem } from '../types';
 import { Coordinates } from '../../domain/types';
-import { PLACES_REGISTRY } from '../../data/placesRegistry';
+import { PLACES_REGISTRY } from '../../data/seedData';
 import { haversineDistanceKm } from '../../utils/geo';
 
 export class MockPlaceProvider implements PlaceSearchProvider {
