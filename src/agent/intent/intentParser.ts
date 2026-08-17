@@ -141,8 +141,9 @@ Requirements:
     const period = isEvening ? 'evening' : isMorning ? 'morning' : 'afternoon';
 
     // Domain / Scenario Classification
+    const drRegex = /(^|\s|[.,!?])(др|dr)([.,!?]|\s|$)/i;
     const isCelebration =
-      lower.includes('др') ||
+      drRegex.test(lower) ||
       lower.includes('день рождения') ||
       lower.includes('рождени') ||
       lower.includes('отпраздновать') ||

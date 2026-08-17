@@ -100,7 +100,14 @@ Return JSON matching:
     );
     const isOvernight = intent.accommodation.required;
     const isQuiet = intent.atmosphere.some((a) => a.includes('quiet') || a.includes('peaceful'));
-    const isCelebration = rawLower.includes('др') || rawLower.includes('день рождения') || rawLower.includes('отпраздновать') || rawLower.includes('банкет') || rawLower.includes('праздник') || rawLower.includes('юбилей');
+    const drRegex = /(^|\s|[.,!?])(др|dr)([.,!?]|\s|$)/i;
+    const isCelebration =
+      drRegex.test(rawLower) ||
+      rawLower.includes('день рождения') ||
+      rawLower.includes('отпраздновать') ||
+      rawLower.includes('банкет') ||
+      rawLower.includes('праздник') ||
+      rawLower.includes('юбилей');
     const isDining = rawLower.includes('ресторан') || rawLower.includes('кафе') || rawLower.includes('поужинать') || rawLower.includes('пообедать') || rawLower.includes('стейк') || rawLower.includes('кухн') || isCelebration;
     const isWine = rawLower.includes('вин') || rawLower.includes('wine') || rawLower.includes('сомель') || rawLower.includes('энотек');
     const isBarNightlife = rawLower.includes('бар') || rawLower.includes('паб') || rawLower.includes('коктейл') || rawLower.includes('пив') || rawLower.includes('спикизи') || rawLower.includes('диджей') || rawLower.includes('клуб') || rawLower.includes('кальян');
